@@ -126,84 +126,84 @@ const logoutUser = asyncHandler(async (req, res) => {
         )
 })
 
-const refreshAccessToken = asyncHandler(async (req,res) => {
+const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken
     if (!incomingRefreshToken) {
-        throw new ApiError(401,"Unauthorized")
+        throw new ApiError(401, "Unauthorized")
     }
-    const decodedToken = jwt.verify(incomingRefreshToken,REFRESH_TOKEN_SECRET)
+    const decodedToken = jwt.verify(incomingRefreshToken, REFRESH_TOKEN_SECRET)
     const user = await User.findById(decodedToken._id)
     if (!user) {
-        throw new ApiError(400,"Invalid RefreshToken!")
+        throw new ApiError(400, "Invalid RefreshToken!")
     }
     if (incomingRefreshToken !== user.refreshToken) {
-        throw new ApiError(401,"RefreshToken Expried or used")
+        throw new ApiError(401, "RefreshToken Expried or used")
     }
-    const {accessToken,newRefreshToken} = await generateAccessAndRefreshToken(user._id)
+    const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(user._id)
     const options = {
-        httpOnly:true,
-        secure:true
+        httpOnly: true,
+        secure: true
     }
     res.status(200)
-    .cookie("accessToken",accessToken,options)
-    .cookie("refreshToken",newRefreshToken,options)
-    .json(
-        new ApiResponse(
-            200,
-            {accessToken,refreshToken:newRefreshToken},
-            "accessToken successfully refreshed"
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                { accessToken, refreshToken: newRefreshToken },
+                "accessToken successfully refreshed"
+            )
         )
-    )
 })
 
-const changeCurrentPassword = asyncHandler(async (req,res) => {
-    const {oldpassword,password} = req.body
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+    const { oldpassword, password } = req.body
     const user = await User.findById(req.user?._id)
     const isPasswordCorrect = await user.isPasswordCorrect(oldpassword)
     if (!isPasswordCorrect) {
-        throw new ApiError(400,"old password is wrong")
+        throw new ApiError(400, "old password is wrong")
     }
     user.password = password
-    await user.save({validateBeforeSave:false})
+    await user.save({ validateBeforeSave: false })
     return res.status(200).json(
-        new ApiResponse(200,{},"password is changed")
+        new ApiResponse(200, {}, "password is changed")
     )
 })
 
-const getCurrentUser = asyncHandler(async (req,res) => {
+const getCurrentUser = asyncHandler(async (req, res) => {
     return res.status(200)
-    .json(
-        new ApiResponse(200,req.user,"user successfully get")
-    )
+        .json(
+            new ApiResponse(200, req.user, "user successfully get")
+        )
 })
 
-const updateAccountDetails = asyncHandler(async (req,res) => {
-    const {email,fullname} = req.body
+const updateAccountDetails = asyncHandler(async (req, res) => {
+    const { email, fullname } = req.body
     if (!email && !fullname) {
-        throw new ApiError(400,"fullname or email are required")
+        throw new ApiError(400, "fullname or email are required")
     }
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set:{
+            $set: {
                 fullname,
                 email
             }
         },
         {
-            new:true
+            new: true
         }
     ).select("-password")
     return res.status(200)
-    .json(
-        new ApiResponse(200,user,"user account details successfully updated")
-    )
+        .json(
+            new ApiResponse(200, user, "user account details successfully updated")
+        )
 })
 
-const updateUserAvatar = asyncHandler(async (req,res) => {
+const updateUserAvatar = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.file?.path
     if (!avatarLocalPath) {
-        throw new ApiError(400,"avatar is required")
+        throw new ApiError(400, "avatar is required")
     }
     const user1 = await User.findById(req.user._id);
     const publicId = user1.avatar?.split('/').pop().split('.')[0];
@@ -213,12 +213,12 @@ const updateUserAvatar = asyncHandler(async (req,res) => {
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                avatar:avatar.url
+            $set: {
+                avatar: avatar.url
             }
         },
         {
-            new:true
+            new: true
         }
     ).select("-password -refreshToken")
     res.status(200).json(
@@ -230,10 +230,10 @@ const updateUserAvatar = asyncHandler(async (req,res) => {
     )
 })
 
-const updateUserCoverImage = asyncHandler(async (req,res) => {
+const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverLocalPath = req.file?.path
     if (!coverLocalPath) {
-        throw new ApiError(400,"coverImage is required")
+        throw new ApiError(400, "coverImage is required")
     }
     const user1 = await User.findById(req.user._id);
     const publicId = user1.avatar?.split('/').pop().split('.')[0];
@@ -243,11 +243,11 @@ const updateUserCoverImage = asyncHandler(async (req,res) => {
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set:{
+            $set: {
                 coverImage: coverImage.url
             }
         },
-        {new: true}
+        { new: true }
     ).select("-password")
 
     res.status(200).json(
@@ -259,102 +259,102 @@ const updateUserCoverImage = asyncHandler(async (req,res) => {
     )
 })
 
-const getUserChannelProfile = asyncHandler(async (req,res) => {
-    const {username} = req.params
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const { username } = req.params
     if (!username.trim()) {
-        throw new ApiError(400,"username required!")
+        throw new ApiError(400, "username required!")
     }
     const channel = await User.aggregate([
         {
-            $match:{
-                username:username
+            $match: {
+                username: username
             }
         },
         {
-            $lookup:{
-                from:"subscriptions",
-                localField:"_id",
-                foreignField:"channel",
-                as:"subscribers"
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
             }
         },
         {
-            $lookup:{
-                from:"subscriptions",
-                localField:"_id",
-                foreignField:"subscriber",
-                as:"subscribedTo"
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
             }
         },
         {
-            $addFields:{
-                subscribersCount:{
-                    $size:"$subscribers"
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
                 },
-                channelSubscribedToCount:{
-                    $size:"$subscribedTo"
+                channelSubscribedToCount: {
+                    $size: "$subscribedTo"
                 },
-                isSubscrideb:{
-                    $cond:{
-                        if:{$in:[req.user._id,"$subscribers.subscriber"]},
+                isSubscrideb: {
+                    $cond: {
+                        if: { $in: [req.user._id, "$subscribers.subscriber"] },
                         then: true,
-                        else:false
+                        else: false
                     }
                 }
             }
         },
         {
-            $project:{
-                fullname:1,
-                username:1,
-                subscribersCount:1,
-                channelSubscribedToCount:1,
-                isSubscrideb:1,
-                avatar:1,
-                coverImage:1,
-                email:1
+            $project: {
+                fullname: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelSubscribedToCount: 1,
+                isSubscrideb: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
             }
         }
     ])
     if (!channel?.length) {
-        throw new ApiError(404,"channel does not exist")
+        throw new ApiError(404, "channel does not exist")
     }
     return res.status(200)
-    .json(
-        new ApiResponse(
-            200,
-            channel[0],
-            "User channel fetched successfully"
+        .json(
+            new ApiResponse(
+                200,
+                channel[0],
+                "User channel fetched successfully"
+            )
         )
-    )
 })
 
-const getWatchHistory = asyncHandler(async (req,res) => {
+const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
-            $match:{
-                _id:new  mongoose.Types.ObjectId(req.user?._id)
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user?._id)
             }
-        },{
-            $lookup:{
-                from:"videos",
-                localField:"watchHistory",
-                foreignField:"_id",
-                as:"watchHistory",
-                pipeline:[
+        }, {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
                     {
-                        $lookup:{
-                            from:"users",
-                            localField:"owner",
-                            foreignField:"_id",
-                            as:"owner",
-                            pipeline:[
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
                                 {
-                                    $lookup:{
-                                        $project:{
-                                            fullname:1,
-                                            username:1,
-                                            avatar:1
+                                    $lookup: {
+                                        $project: {
+                                            fullname: 1,
+                                            username: 1,
+                                            avatar: 1
                                         }
                                     }
                                 }
@@ -362,9 +362,9 @@ const getWatchHistory = asyncHandler(async (req,res) => {
                         }
                     },
                     {
-                        $addFields:{
-                            owner:{
-                                $first:"$owner"
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
                             }
                         }
                     }

@@ -2,15 +2,18 @@ import mongoose, { Schema } from "mongoose";
 
 const likeSchema = new Schema(
     {
-        userId:{
+        likedBy:{
             type:Schema.Types.ObjectId,
-            ref:"User",
-            required:true
+            ref:"User"
         },
-        videoId:{
+        video:{
             type:Schema.Types.ObjectId,
             ref:"Video"
         },
+        comment:{
+            type:Schema.Types.ObjectId,
+            ref:"Comment"
+        }
     },
     {
         timestamps:true
