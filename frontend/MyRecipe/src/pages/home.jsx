@@ -1,8 +1,10 @@
 import {useState,React} from 'react'
 import Navbar from '../components/navbar'
+import { useAuth } from '../context/authContext'
 
 const home = () => {
-    const [isTrue, setIsTrue] = useState(false)
+      const { user } = useAuth()
+      console.log('home',user)
   return (
     <div className='mainCont'>
       <Navbar/>

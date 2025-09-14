@@ -6,6 +6,10 @@ import mongoose from "mongoose"
 import jwt from "jsonwebtoken"
 import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js"
 import { Subscription } from "../models/subscription.model.js"
+// import dotenv from "dotenv"
+// dotenv.config({
+//     path: './.env'
+// })
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -131,7 +135,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     if (!incomingRefreshToken) {
         throw new ApiError(401, "Unauthorized")
     }
-    const decodedToken = jwt.verify(incomingRefreshToken, REFRESH_TOKEN_SECRET)
+    const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
     const user = await User.findById(decodedToken._id)
     if (!user) {
         throw new ApiError(400, "Invalid RefreshToken!")
@@ -139,7 +143,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     if (incomingRefreshToken !== user.refreshToken) {
         throw new ApiError(401, "RefreshToken Expried or used")
     }
-    const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(user._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+    const newRefreshToken = refreshToken
+    // console.log('newRfereshToken:',refreshToken);
     const options = {
         httpOnly: true,
         secure: true
@@ -150,7 +156,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                { accessToken, refreshToken: newRefreshToken },
+                { accessToken,refreshToken:newRefreshToken},
                 "accessToken successfully refreshed"
             )
         )

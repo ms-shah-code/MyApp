@@ -1,15 +1,17 @@
 import { useState, React } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Sidebar from './sidebar'
 import { AiOutlineSearch } from "react-icons/ai"
 import { FaBars } from 'react-icons/fa'
 import '../index.css'
 import { useAuth } from '../context/authContext'
+import { Navigate } from 'react-router-dom'
+import Loading from './Loading'
 
 const sidebar = () => {
-    const { user } = useAuth()
-    console.log('nav',user)
+    const { user,loading } = useAuth()
     const [isOpen, setIsOpen] = useState(false)
+    const navigate = useNavigate()
     return (
         <div>
             <nav
@@ -55,7 +57,11 @@ const sidebar = () => {
                         height: '30px',
                         margin: '0px',
                         cursor:'pointer'
-                    }} />
+                    }} onClick={()=>{
+                        setTimeout(() => {
+                            navigate('/profile')
+                        }, 1000);
+                    }}/>
                 </div>
             </nav>
             <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />

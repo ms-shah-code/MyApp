@@ -3,16 +3,19 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { AiFillHome } from 'react-icons/ai'
 import { MdOutlineSubscriptions, MdVideoLibrary, MdHistory } from 'react-icons/md'
-
+import { useAuth } from '../context/authContext'
+import {FiLogOut} from 'react-icons/fi'
 
 const categories = [
     { name: 'Home', path: "/home", icon: <AiFillHome size={22} /> },
     { name: 'subscriptions', path: "/subscriptions", icon: <MdOutlineSubscriptions size={22} /> },
     { name: 'History', path: "/history", icon: <MdHistory size={22} /> },
     { name: 'Library', path: "/library", icon: <MdVideoLibrary size={22} /> },
+    {name:'Logout',path:'/login',icon:<FiLogOut size={22}/>}
 ]
 
 const sidebar = ({ isOpen, setIsOpen }) => {
+    const {logout,user} = useAuth()
     return (
         <>
             {isOpen && (

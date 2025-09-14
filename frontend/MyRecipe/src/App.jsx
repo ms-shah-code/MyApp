@@ -4,6 +4,7 @@ import Signup from './pages/signup'
 import Login from './pages/login'
 import Home from './pages/home'
 import { AuthProvider } from './context/authContext'
+import Profile from './pages/Profile'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -17,6 +18,7 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/signup' element={<Signup />} />
             <Route path='/home' element={<Home />} />
+            <Route path='/profile' element={<Profile/>}/>
           </Routes>
         </AuthProvider>
       </div>
