@@ -33,10 +33,12 @@ export const AuthProvider = ({ children }) => {
   // ✅ Logout function
   const logout = async () => {
     try {
-      await fetch("http://localhost:8000/api/v1/users/logout", {
+     const res = await fetch("http://localhost:8000/api/v1/users/logout", {
         method: "POST",
         credentials: "include",
-      });
+      })
+      const response = await res.json()
+      console.log('res::',res)
     } catch (err) {
       console.error("Logout error:", err);
     }
@@ -94,4 +96,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

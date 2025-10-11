@@ -2,20 +2,21 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { AiFillHome } from 'react-icons/ai'
-import { MdOutlineSubscriptions, MdVideoLibrary, MdHistory } from 'react-icons/md'
+import { MdOutlineSubscriptions, MdVideoLibrary, MdHistory, MdUpload } from 'react-icons/md'
 import { useAuth } from '../context/authContext'
-import {FiLogOut} from 'react-icons/fi'
+import { FiLogOut } from 'react-icons/fi'
 
 const categories = [
     { name: 'Home', path: "/home", icon: <AiFillHome size={22} /> },
     { name: 'subscriptions', path: "/subscriptions", icon: <MdOutlineSubscriptions size={22} /> },
     { name: 'History', path: "/history", icon: <MdHistory size={22} /> },
     { name: 'Library', path: "/library", icon: <MdVideoLibrary size={22} /> },
-    {name:'Logout',path:'/login',icon:<FiLogOut size={22}/>}
+    { name: 'Upload', path: '/upload', icon: <MdUpload size={22} /> },
+    // {name:'Logout',path:'/logout',icon:<FiLogOut size={22}/>},
 ]
 
 const sidebar = ({ isOpen, setIsOpen }) => {
-    const {logout,user} = useAuth()
+    const { logout, user } = useAuth()
     return (
         <>
             {isOpen && (
@@ -90,7 +91,24 @@ const sidebar = ({ isOpen, setIsOpen }) => {
                             onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
                             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                         >{item.icon}<span>{item.name}</span></Link></li>
+
                     ))}
+                    {user && <li><Link to={'/login'}
+                        style={{
+                            display: "flex",
+                            textDecoration: 'none',
+                            color: 'white',
+                            fontsize: '20px',
+                            alignItems: 'center',
+                            gap: '10px',
+                            borderRadius: '6px',
+                            padding: '8px 12px'
+                        }}
+                        onClick={()=>logout()}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >{<FiLogOut size={22}/>}<span>Logout</span></Link></li>}
+
                 </ul>
             </motion.div >
         </>

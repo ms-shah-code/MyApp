@@ -1,3 +1,4 @@
+import { animate } from 'framer-motion'
 import React from 'react'
 
 const Loading = () => {
@@ -12,10 +13,24 @@ const styles = {
     container:{
         height:"100vh",
         display:"flex",
+        flexDirection:'center',
+        justifyContent:"center",
+        alignItems:"center",
+        gap:"10px",
+        background:"#f5f5f5"
     },
     spinner:{
-        width:"50px",
-        height:"50px"
+        width:"40px",
+        height:"40px",
+        border:"6px solid #ddd",
+        borderTop:"6px solid #007bff",
+        borderRadius:"50%",
+        animation:"spin 1s linear infinite"
     }
 }
+const styleSheet = document.styleSheets[0];
+styleSheet.insertRule(
+  "@keyframes spin{ 0% {transform:rotate(0deg)}100%{transform: rotate(360deg)}}",
+  styleSheet.cssRules.length
+)
 export default Loading

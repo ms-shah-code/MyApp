@@ -6,10 +6,9 @@ import { FaBars } from 'react-icons/fa'
 import '../index.css'
 import { useAuth } from '../context/authContext'
 import { Navigate } from 'react-router-dom'
-import Loading from './Loading'
 
 const sidebar = () => {
-    const { user,loading } = useAuth()
+    const { user } = useAuth()
     const [isOpen, setIsOpen] = useState(false)
     const navigate = useNavigate()
     return (
@@ -54,7 +53,8 @@ const sidebar = () => {
                 <div>
                     <img src={user.avatar} alt="User" style={{
                         borderRadius: '50%',
-                        height: '30px',
+                        height: '40px',
+                        width:'40px',
                         margin: '0px',
                         cursor:'pointer'
                     }} onClick={()=>{
