@@ -4,8 +4,11 @@ import { MdUpload } from "react-icons/md";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import { handleSuccess, handleError } from "../utility";
+import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft } from "react-icons/fa";
 
 const Upload = () => {
+  const navigate = useNavigate();
   const [uploadVideo, setUploadVideo] = useState({
     title: "",
     description: "",
@@ -95,6 +98,22 @@ const Upload = () => {
 
   return (
     <div style={styles.page}>
+      <button onClick={() => navigate(-1)}
+        style={{
+          position: 'absolute',
+          top: "10px",
+          left: '10px',
+          color: 'gray',
+          borderRadius: '5px',
+          padding: '5px',
+          border: 'none',
+          background:"transparent"
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+
+
+      ><FaArrowLeft size={28} /></button>
       <div style={styles.container} onClick={!videoFile ? handleClick : null}>
         <input
           type="file"
@@ -158,7 +177,7 @@ const Upload = () => {
         />
 
         <button type="submit" style={styles.uploadBtn}>
-          <MdUpload size={20} /> Upload
+          <MdUpload size={25} /> Upload
         </button>
       </form>
 
@@ -252,6 +271,10 @@ const styles = {
     borderRadius: "6px",
     fontWeight: "bold",
     cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "7px",
   },
 };
 

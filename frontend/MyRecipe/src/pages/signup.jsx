@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify"
 import "../signup.css"
 import { Link, useNavigate } from 'react-router-dom'
 import { handleSuccess, handleUpdate, handleError } from '../utility'
+import { FaUserCircle } from 'react-icons/fa'
 
 const signup = () => {
   const [signupInfo, setSignupInfo] = useState({
@@ -49,7 +50,7 @@ const signup = () => {
       const res = await fetch("http://localhost:8000/api/v1/users/register", {
         method: "POST",
         body: formData,
-        credentials:'include',
+        credentials: 'include',
       })
       const data = await res.json()
       console.log(data)
@@ -79,63 +80,69 @@ const signup = () => {
       style={{
         display: 'flex',
         justifyContent: 'center',
-          alignItems: 'center',
-            height: "97vh"
-}}>
-  <div className='container'>
-    <h1>Sign up</h1>
-    <form onSubmit={handleSubmit}>
-      <div className="main">
-        <div className='avatar'>
-          <div className="profile" >
-            <img src={avatarUrl} alt="" style={{ width: '100px', height: '100px', border: '2px solid gray', borderRadius: '50%' }} />
+        alignItems: 'center',
+        height: "100vh",
+        background: "#202020",
+        color:'white'
+      }}>
+      <div className='container' style={{background:"#313131"}}>
+        <h1>Sign up</h1>
+        <form onSubmit={handleSubmit}>
+          <div className="main">
+            <div className='avatar'>
+              <div className="profile" >
+               {avatarUrl ? <img src={avatarUrl} alt="" style={{ width: '100px', height: '100px', border: '2px solid gray', borderRadius: '50%' }} /> :<FaUserCircle size={100}/>} 
+              </div>
+            </div>
+            <div className="btn">
+              <label htmlFor='avatarFile' className='label' style={{color:'white',border:"2px solid white"}}>Avatar</label>
+              <input type="file" name='avatar' accept='image/*' id='avatarFile' style={{ display: "none" }} onChange={handleChange} />
+            </div>
+            <div className="">
+              <input
+                type="email"
+                name="email"
+                value={signupInfo.email}
+                onChange={handleChange}
+                placeholder='Enter your email'
+                style={{background:"transparent",border:'1px solid gray',outline:'none',color:'white',width:"92%"}}
+              />
+            </div>
+            <div className="">
+              <input type="text"
+                name="fullname"
+                value={signupInfo.fullname}
+                onChange={handleChange}
+                placeholder='Fullname'
+                style={{background:"transparent",border:'1px solid gray',color:'white',width:"92%"}}
+              />
+            </div>
+            <div>
+              <input type="text"
+                name="username"
+                value={signupInfo.username}
+                placeholder='Username'
+                onChange={handleChange}
+                style={{background:"transparent",border:'1px solid gray',color:'white',width:"92%"}}
+              />
+            </div>
+            <div>
+              <input type="password"
+                name="password"
+                value={signupInfo.password}
+                placeholder='Password'
+                onChange={handleChange}
+                style={{background:"transparent",border:'1px solid gray',color:'white',width:"92%"}}
+              />
+            </div>
+            <button type='submit' className='sbtn' style={{background:"#0277bd"}}>Signup</button>
+            <span>Already have an account ? 
+              <Link to='/login' style={{color:"blue"}}>Login</Link>
+            </span>
           </div>
-        </div>
-        <div className="btn">
-          <label htmlFor='avatarFile' className='label'>Avatar</label>
-          <input type="file" name='avatar' accept='image/*' id='avatarFile' style={{ display: "none" }} onChange={handleChange} />
-        </div>
-        <div className="">
-          <input
-            type="email"
-            name="email"
-            value={signupInfo.email}
-            onChange={handleChange}
-            placeholder='Enter your email'
-          />
-        </div>
-        <div className="">
-          <input type="text"
-            name="fullname"
-            value={signupInfo.fullname}
-            onChange={handleChange}
-            placeholder='Fullname'
-          />
-        </div>
-        <div>
-          <input type="text"
-            name="username"
-            value={signupInfo.username}
-            placeholder='Username'
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <input type="password"
-            name="password"
-            value={signupInfo.password}
-            placeholder='Password'
-            onChange={handleChange}
-          />
-        </div>
-        <button type='submit' className='sbtn'>Signup</button>
-        <span>Already have an account ?
-          <Link to='/login'>Login</Link>
-        </span>
+        </form>
+        <ToastContainer />
       </div>
-    </form>
-    <ToastContainer />
-  </div>
     </div >
   )
 }

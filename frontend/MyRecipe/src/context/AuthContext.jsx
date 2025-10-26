@@ -89,6 +89,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+
   return (
     <AuthContext.Provider value={{ user, accessToken, login, logout, loading }}>
       {loading?<Loading/>:children}

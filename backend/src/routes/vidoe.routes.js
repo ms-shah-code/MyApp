@@ -6,13 +6,16 @@ import {
     getVidoeById,
     publishVideo,
     togglePublishStatus,
-    updateVideo
+    updateVideo,
+    getAllVideosByUserId,
+    downloadVideos
 } from "../controllers/video.controller.js"
 import { verifyJWT } from "../middleware/auth.middleware.js"
 
 const router = Router()
 
-router.route("/").get(verifyJWT,getAllVideos)
+router.route("/").get(getAllVideos)
+router.route("/user/:userId").get(verifyJWT,getAllVideosByUserId)
 router.route("/up").post(verifyJWT, upload.fields([
         {
             name: "videoUrl",
@@ -32,4 +35,5 @@ router
     .patch(verifyJWT, upload.single("thumbnail"), updateVideo)
 
 router.route("/toggle/publish/:videoId").patch(verifyJWT, togglePublishStatus)
+router.route("/download/:videoId").get(verifyJWT,downloadVideos)
 export default router

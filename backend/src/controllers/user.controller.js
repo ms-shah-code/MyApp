@@ -291,9 +291,19 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 foreignField: "subscriber",
                 as: "subscribedTo"
             }
+        },{
+            $lookup:{
+                from:"videos",
+                localField:"_id",
+                foreignField:"owner",
+                as:"videos"
+            }
         },
         {
             $addFields: {
+                totalVideos:{
+                    $size: "$videos"
+                },
                 subscribersCount: {
                     $size: "$subscribers"
                 },
@@ -318,7 +328,8 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 isSubscrideb: 1,
                 avatar: 1,
                 coverImage: 1,
-                email: 1
+                email: 1,
+                totalVideos:1
             }
         }
     ])
@@ -334,51 +345,68 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             )
         )
 })
-
 const getWatchHistory = asyncHandler(async (req, res) => {
-    const user = await User.aggregate([
-        {
-            $match: {
-                _id: new mongoose.Types.ObjectId(req.user?._id)
-            }
-        }, {
+  // 🔹 Step 1: Ensure user is logged in
+  if (!req.user?._id) {
+    throw new ApiError(401, "Unauthorized access - user not logged in");
+  }
+
+  // 🔹 Step 2: Aggregate user with populated watch history
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [
+          {
             $lookup: {
-                from: "videos",
-                localField: "watchHistory",
-                foreignField: "_id",
-                as: "watchHistory",
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: "users",
-                            localField: "owner",
-                            foreignField: "_id",
-                            as: "owner",
-                            pipeline: [
-                                {
-                                    $lookup: {
-                                        $project: {
-                                            fullname: 1,
-                                            username: 1,
-                                            avatar: 1
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        $addFields: {
-                            owner: {
-                                $first: "$owner"
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    ])
-})
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    fullname: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: { $first: "$owner" },
+            },
+          },
+          {
+            $sort: { createdAt: -1 }, // 🕒 latest watched first
+          },
+        ],
+      },
+    },
+  ]);
+
+  //  Step 3: Handle case where user or history not found
+  if (!user || user.length === 0) {
+    throw new ApiError(404, "User not found or no watch history");
+  }
+
+  const history = user[0].watchHistory || [];
+
+  // 🔹 Step 4: Send response
+  return res
+    .status(200)
+    .json(new ApiResponse(200, history, "Watch history fetched successfully"));
+});
 
 export {
     registerUser,

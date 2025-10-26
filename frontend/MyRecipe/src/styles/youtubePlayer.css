@@ -1,107 +1,83 @@
-.player-container {
+.seekbar-container {
   position: relative;
-  max-width: 900px;
-  margin: auto;
-  background: #000;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.player-video {
-  width: 100%;
-  height: auto;
+  height: 5px;
+  width: 97%;
+  background: #444;
   cursor: pointer;
+  border-radius: 3px;
+  overflow: visible; /* ✅ allows thumb to go out slightly */
+  margin-left: -3px;
 }
 
-.controls {
+/* Buffered bar */
+.buffered {
   position: absolute;
-  bottom: 0;
+  top: 0;
+  left: 0;
+  height: 5px;
+  background: #888;
+  border-radius: 3px;
+  transition: width 0.1s ease;
+}
+
+/* Played progress */
+.played {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  background: #ff0000;
+  border-radius: 3px;
+  transition: width .2s linear;
+}
+
+/* Input slider */
+.seekbar-input {
+  position: absolute;
+  top: -6.6px; /* ✅ centers thumb over track */
+  left: 0;
   width: 100%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  padding: 10px;
-  color: white;
-  transition: opacity 0.3s ease;
-}
-
-.seekbar {
-  width: 100%;
-  accent-color: red;
-  cursor: pointer;
-}
-
-.bottom-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 5px;
-}
-
-.left-controls,
-.right-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-button {
+  height: 14px;
   background: transparent;
-  border: none;
-  color: white;
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
-  font-size: 20px;
-}
-
-.volume-slider {
-  width: 80px;
-}
-
-.speed-menu {
-  position: absolute;
-  right: 50px;
-  bottom: 60px;
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  border-radius: 8px;
-  padding: 8px;
   z-index: 10;
 }
 
-.speed-option {
-  padding: 5px 10px;
+/* Thumb (YouTube-like) */
+.seekbar-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #ff0000;
+  border-radius: 50%;
   cursor: pointer;
+  opacity: 0; /* ✅ hidden by default */
+  transition: opacity 0.15s ease, transform .15s ease;
 }
 
-.speed-option:hover,
-.speed-option.active {
-  background: rgba(255, 255, 255, 0.2);
+.seekbar-container:hover .seekbar-input::-webkit-slider-thumb {
+  opacity: 1;
+  transform: scale(1.2);
 }
 
-.overlay {
+/* Tooltip above thumb */
+.seekbar-tooltip {
   position: absolute;
-  top: 40%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
   color: white;
-  font-size: 22px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: fade 0.5s ease;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.overlay.left {
-  left: 10%;
-}
-
-.overlay.right {
-  right: 10%;
-}
-
-@keyframes fade {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.seekbar-container:hover .seekbar-tooltip {
+  opacity: 1;
 }

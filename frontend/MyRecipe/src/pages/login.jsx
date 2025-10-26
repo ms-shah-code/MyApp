@@ -60,9 +60,11 @@ const login = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: "97vh"
+        height: "100vh",
+        background: "#202020",
+        color:'white'
       }}>
-      <div className='container'>
+      <div className='container' style={{background:"#313131"}}>
         <h1>Login</h1>
         <form onSubmit={handleSubmit}>
           <div className="main">
@@ -73,6 +75,7 @@ const login = () => {
                 value={loginInfo.email}
                 onChange={handleChange}
                 placeholder='Enter your email'
+                style={{background:"transparent",border:'1px solid gray',color:'white'}}
               />
             </div>
             <div>
@@ -81,11 +84,12 @@ const login = () => {
                 value={loginInfo.password}
                 placeholder='Password'
                 onChange={handleChange}
+                style={{background:"transparent",border:'1px solid gray',color:'white'}}
               />
             </div>
-            <button type='submit' className='sbtn'>Login</button>
+            <button type='submit' className='sbtn' style={{background:"#0277bd"}}>Login</button>
             <span>does't have an account ?
-              <Link to='/signup'>register</Link>
+              <Link to='/signup' style={{color:'blue'}}>register</Link>
             </span>
           </div>
         </form>

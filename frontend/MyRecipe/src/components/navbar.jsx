@@ -6,11 +6,16 @@ import { FaBars } from 'react-icons/fa'
 import '../index.css'
 import { useAuth } from '../context/authContext'
 import { Navigate } from 'react-router-dom'
+import SearchPopup from './SearchPopup'
 
 const sidebar = () => {
     const { user } = useAuth()
     const [isOpen, setIsOpen] = useState(false)
+    const [isOpenSe, setIsOpenSe] = useState(false)
     const navigate = useNavigate()
+    const handleAvatarClick = (uname) => {
+        navigate(`/channel/${uname}`)
+    }
     return (
         <div>
             <nav
@@ -19,8 +24,11 @@ const sidebar = () => {
                     alignItems: "center",
                     justifyContent: 'space-between',
                     padding: '10px 20px',
-                    backgroundColor: '#202020',
+                    backgroundColor: '#0f0f0f',
                     color: 'white',
+                    borderBottom: '1px solid #333',
+                    top: '0',
+                    zIndex: '1000',
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -54,10 +62,11 @@ const sidebar = () => {
                             border: 'none',
                             fontSize: '19px',
                             fontWeight: '900',
-                            background: '#202020',
+                            background: '#0f0f0f',
                             color: 'white',
-                            cursor:"pointer"
+                            cursor: "pointer"
                         }}
+                            onClick={() => setIsOpenSe(!isOpenSe)}
                             onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
                             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                         ><AiOutlineSearch /></button>
@@ -67,13 +76,14 @@ const sidebar = () => {
                         height: '40px',
                         width: '40px',
                         margin: '0px',
-                        cursor: 'pointer'
-                    }} onClick={() => {
-                        setTimeout(() => {
-                            navigate('/profile')
-                        }, 1000);
-                    }} />
+                        cursor: 'pointer',
+                        objectFit: 'cover',
+                    }} onClick={() => handleAvatarClick(user.username)} />
                 </div>
+                <SearchPopup
+                    isOpenSe={isOpenSe}
+                    setIsOpenSe={setIsOpenSe}
+                />
             </nav >
             <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
         </div >

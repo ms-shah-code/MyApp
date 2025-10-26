@@ -17,7 +17,10 @@ const styles = {
         justifyContent:"center",
         alignItems:"center",
         gap:"10px",
-        background:"#f5f5f5"
+        background:"#0f0f0f",
+        color:"#fff",
+        fontSize:"18px",
+        fontWeight:"500"
     },
     spinner:{
         width:"40px",
