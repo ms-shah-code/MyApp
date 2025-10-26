@@ -1,0 +1,107 @@
+.player-container {
+  position: relative;
+  max-width: 900px;
+  margin: auto;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.player-video {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 10px;
+  color: white;
+  transition: opacity 0.3s ease;
+}
+
+.seekbar {
+  width: 100%;
+  accent-color: red;
+  cursor: pointer;
+}
+
+.bottom-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.left-controls,
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+button {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.volume-slider {
+  width: 80px;
+}
+
+.speed-menu {
+  position: absolute;
+  right: 50px;
+  bottom: 60px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 10;
+}
+
+.speed-option {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.speed-option:hover,
+.speed-option.active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.overlay {
+  position: absolute;
+  top: 40%;
+  color: white;
+  font-size: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fade 0.5s ease;
+}
+
+.overlay.left {
+  left: 10%;
+}
+
+.overlay.right {
+  right: 10%;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

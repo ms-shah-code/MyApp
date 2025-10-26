@@ -46,17 +46,16 @@ const getAllVideos = asyncHandler(async (req, res) => {
 })
 
 const publishVideo = asyncHandler(async (req, res) => {
-    const { title, decsription } = req.body;
-    if (!title && !decsription) {
+    const { title, description } = req.body;
+    if (!title && !description) {
         throw new ApiError(400, "title and descreption fileds are required")
     }
     let videoLocalPath;
-    if (req.files && Array.isArray(req.files.videoUrl) && req.files.videoUrl > 0) {
-        videoLocalPath = req.files.videoUrl[0].path
-    }
+    console.log('video:',req.files.videoUrl[0].path);
+    videoLocalPath = req.files.videoUrl[0].path;
     let thumbnailLocalPath;
-    if (req.files && Array.isArray(req.files.thumbnail) && req.files.thumbnail > 0) {
-        thumbnailLocalPath = req.files.thumbnail[0].path
+    if (req.files.thumbnail && req.files.thumbnail[0]?.path) {
+        thumbnailLocalPath = req.files.thumbnail[0].path;
     }
     if (!videoLocalPath) {
         throw new ApiError(400, "video is required")
@@ -66,19 +65,14 @@ const publishVideo = asyncHandler(async (req, res) => {
     if (!video) {
         throw new ApiError(500, "something went wrong during uploading video")
     }
-    const formateDuration = async (seconds) => {
-        const hrs = Math.floor(seconds / 3600)
-        const min = Math.floor((seconds % 3600) / 60)
-        const sec = Math.floor(seconds % 60)
-        return `${hrs.toString().padStart(2, "0")}:` + `${min.toString().padStart(2, "0")}:` + `${sec.toString().padStart(2, "0")}:`
-    }
-    const duration = formateDuration(video?.duration)
+    console.log("FILES:", req.files, "BODY:", req.body);
+
     const createdVideo = await Video.create({
         videoUrl: video.url,
-        decsription,
+        description,
         title,
         thumbnail: thumbnail?.url || "",
-        duration: duration,
+        duration: video.duration,
         owner: req.user?._id
     })
     return res.status(201).json(
@@ -101,12 +95,7 @@ const getVidoeById = asyncHandler(async (req, res) => {
         video.viewedBy.push(userId)
         await video.save()
     }
-    res.status(200)
-        .json(
-            200,
-            video,
-            "Video Successfully fetched"
-        )
+    res.status(200).json(new ApiResponse(201,video,"Video successfully fetched"))
 })
 
 const updateVideo = asyncHandler(async (req, res) => {

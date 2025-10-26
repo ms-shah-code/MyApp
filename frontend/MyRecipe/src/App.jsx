@@ -8,6 +8,7 @@ import Profile from './pages/Profile'
 import ProtectedRoute from './components/ProtectedRoute'
 import Upload from './pages/Upload'
 import Loading from './components/Loading'
+import Watch from './pages/Watch'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -24,6 +25,8 @@ function App() {
             <Route path='/profile' element={<Profile />} />
             {/* <Route path='/loading' element={<Loading />} /> remove */}
             <Route path='/upload' element={<ProtectedRoute><Upload /></ProtectedRoute> } />
+            <Route path='/watch/:videoId' element={<Watch />} />
+            <Route path='*' element={<h1>404 Not Found</h1>} />
           </Routes>
         </AuthProvider>
       </div>

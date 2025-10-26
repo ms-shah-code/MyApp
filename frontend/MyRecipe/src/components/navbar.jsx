@@ -40,32 +40,43 @@ const sidebar = () => {
                     </button>
                     <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0' }}>MyTube</h1>
                 </div>
-                <form>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: "10px"
+                }}>
                     <div>
-                        <input
-                            type="text"
-                            placeholder='Search'
-                            style={{ height: "25px", width: '250px', fontSize: "19px", border: '2px solid white', padding: '4px', color: 'white', backgroundColor: 'transparent', borderRadius: '10px 0px 0px 10px', outline: 'none' }}
-                        />
-                        <button style={{ height: '31px', fontSize: '20px', marginTop: '0px', padding: '3px', paddingBottom: "30px", color: "white", backgroundColor: 'transparent', border: "2px solid white", borderLeft: 'none', borderRadius: '0px 10px 10px 0px', cursor: 'pointer', width: "40px" }}><AiOutlineSearch /></button>
+                        <button style={{
+                            height: "38px",
+                            width: "38px",
+                            borderRadius: '50%',
+                            border: 'none',
+                            fontSize: '19px',
+                            fontWeight: '900',
+                            background: '#202020',
+                            color: 'white',
+                            cursor:"pointer"
+                        }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                        ><AiOutlineSearch /></button>
                     </div>
-                </form>
-                <div>
                     <img src={user.avatar} alt="User" style={{
                         borderRadius: '50%',
                         height: '40px',
-                        width:'40px',
+                        width: '40px',
                         margin: '0px',
-                        cursor:'pointer'
-                    }} onClick={()=>{
+                        cursor: 'pointer'
+                    }} onClick={() => {
                         setTimeout(() => {
                             navigate('/profile')
                         }, 1000);
-                    }}/>
+                    }} />
                 </div>
-            </nav>
+            </nav >
             <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-        </div>
+        </div >
 
     )
 }
