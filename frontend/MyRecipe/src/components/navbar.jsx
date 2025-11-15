@@ -7,6 +7,7 @@ import '../index.css'
 import { useAuth } from '../context/authContext'
 import { Navigate } from 'react-router-dom'
 import SearchPopup from './SearchPopup'
+import { FiYoutube, FiSearch } from 'react-icons/fi'
 
 const sidebar = () => {
     const { user } = useAuth()
@@ -24,7 +25,7 @@ const sidebar = () => {
                     alignItems: "center",
                     justifyContent: 'space-between',
                     padding: '10px 20px',
-                    backgroundColor: '#0f0f0f',
+                    backgroundColor: '#000000ff',
                     color: 'white',
                     borderBottom: '1px solid #333',
                     top: '0',
@@ -46,7 +47,16 @@ const sidebar = () => {
                     >
                         <FaBars />
                     </button>
-                    <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0' }}>MyTube</h1>
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px"
+                        }}
+                    >
+                        <FiYoutube size={30} color={"red"} />
+                        <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0' }}>YouTube</h1>
+                    </div>
                 </div>
                 <div style={{
                     display: 'flex',
@@ -55,21 +65,17 @@ const sidebar = () => {
                     gap: "10px"
                 }}>
                     <div>
-                        <button style={{
-                            height: "38px",
-                            width: "38px",
+                        <FiSearch size={25} style={{
                             borderRadius: '50%',
                             border: 'none',
-                            fontSize: '19px',
-                            fontWeight: '900',
-                            background: '#0f0f0f',
+                            background: '#000000ff',
                             color: 'white',
+                            padding:"7px",
                             cursor: "pointer"
                         }}
                             onClick={() => setIsOpenSe(!isOpenSe)}
                             onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                        ><AiOutlineSearch /></button>
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")} />
                     </div>
                     <img src={user.avatar} alt="User" style={{
                         borderRadius: '50%',

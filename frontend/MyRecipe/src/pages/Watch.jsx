@@ -3,10 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import VideoPlayer from "../components/VideoPlayer";
 import Navbar from "../components/navbar";
 import { useAuth } from "../context/authContext";
-import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { FaThumbsUp, FaThumbsDown, FaDownload, FaShare } from "react-icons/fa";
 import "../styles/watch.css";
 import CommentBox from "../components/CommentBox";
 import Video from "../components/Video";
+import { FiDownload,FiSend } from "react-icons/fi";
+import ShareModal from "../components/ShareModel";
 
 const Watch = () => {
   const { user } = useAuth();
@@ -19,8 +21,8 @@ const Watch = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [disliked, setDisliked] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
-  // ✅ Fetch video details
   useEffect(() => {
     const fetchVideo = async () => {
       try {
@@ -39,8 +41,30 @@ const Watch = () => {
     };
     fetchVideo();
   }, [videoId]);
+  const handleDownload = async (videoId) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/videos/download/${videoId}`, {
+        method: "GET",
+        credentials: "include",
+      });
 
-  // ✅ Fetch like info when video loads
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to get download link");
+
+      const downloadUrl = data.data.downloadUrl;
+
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
   useEffect(() => {
     const fetchLikes = async () => {
       try {
@@ -92,8 +116,8 @@ const Watch = () => {
     const sec = Math.floor(duration % 60);
     return hrs > 0
       ? `${hrs.toString().padStart(2, "0")}:${min
-          .toString()
-          .padStart(2, "0")}:${sec.toString().padStart(2, "0")}`
+        .toString()
+        .padStart(2, "0")}:${sec.toString().padStart(2, "0")}`
       : `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
@@ -143,6 +167,16 @@ const Watch = () => {
               </button>
             </div>
           </div>
+          <div className="icons">
+            <button onClick={() => handleDownload(video._id)} className="download"><span className="icon"><FiDownload size={18} color="gray" />Download</span></button>
+            <button className="download" onClick={() => setShowShare(true)}><span className="icon"><FiSend size={18} color="gray"/>Share</span></button>
+          </div>
+          {showShare && (
+            <ShareModal
+              videoUrl={`${window.location.origin}/watch/${video._id}`}
+              close={() => setShowShare(false)}
+            />
+          )}
 
           <CommentBox videoId={video._id} />
         </div>

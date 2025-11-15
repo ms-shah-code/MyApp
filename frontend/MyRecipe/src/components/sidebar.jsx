@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { AiFillHome } from 'react-icons/ai'
 import { MdOutlineSubscriptions, MdVideoLibrary, MdHistory, MdUpload } from 'react-icons/md'
 import { useAuth } from '../context/authContext'
-import { FiLogOut } from 'react-icons/fi'
+import { FiLogOut, FiYoutube, FiX } from 'react-icons/fi'
 import '../styles/subscription.css'
+import { Navigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom';
 
 const categories = [
     { name: 'Home', path: "/home", icon: <AiFillHome size={22} /> },
@@ -13,11 +15,11 @@ const categories = [
     { name: 'History', path: "/history", icon: <MdHistory size={22} /> },
     { name: 'Library', path: "/library", icon: <MdVideoLibrary size={22} /> },
     { name: 'Upload', path: '/upload', icon: <MdUpload size={22} /> },
-    // {name:'Logout',path:'/logout',icon:<FiLogOut size={22}/>},
 ]
 
 const sidebar = ({ isOpen, setIsOpen }) => {
     const { logout, user } = useAuth();
+    const navigate = useNavigate()
     const [subscriptions, setSubscriptions] = useState([]);
 
     useEffect(() => {
@@ -29,8 +31,6 @@ const sidebar = ({ isOpen, setIsOpen }) => {
                 );
                 const data = await res.json();
                 console.log("data:", data.data.channels);
-
-                // ✅ use channels array, not whole object
                 setSubscriptions(data.data.channels || []);
             } catch (error) {
                 console.error("Error fetching subscriptions:", error);
@@ -66,75 +66,80 @@ const sidebar = ({ isOpen, setIsOpen }) => {
                     left: 0,
                     height: '100vh',
                     width: '240px',
-                    backgroundColor: '#0f0f0f',
+                    backgroundColor: '#000000ff',
                     color: 'white',
                     padding: '20px',
                     zIndex: 1000
                 }}
             >
-                <button
-                    onClick={() => setIsOpen(false)}
+                <div className='logo'
                     style={{
-                        position: 'absolute',
-                        top: "10px",
-                        right: "10px",
-                        fontSize: '20px',
-                        color: 'white',
-                        backgroundColor: "transparent",
-                        border: 'none',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        borderRadius: '6px'
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between"
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                >x</button>
-                <h2 style={{
-                    fontSize: '20px',
-                    marginTop: '-6px',
-                    fontWeight: 'bold',
-                    marginBottom: '26px',
-                    padding: '0px',
-                    paddingBottom: '10px',
-                    borderBottom: '1px solid #333',
-                }}>Menu</h2>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                    {categories.map((item) => (
-                        <li key={item.name} style={{
-                            marginBottom: '15px'
-                        }}><Link to={item.path}
-                            style={{
-                                display: "flex",
-                                textDecoration: 'none',
-                                color: 'white',
-                                fontsize: '20px',
-                                alignItems: 'center',
-                                gap: '10px',
-                                borderRadius: '6px',
-                                padding: '8px 12px'
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                        >{item.icon}<span>{item.name}</span></Link></li>
-
-                    ))}
-                    {user && <li><Link to={'/login'}
+                >
+                    <div
                         style={{
                             display: "flex",
-                            textDecoration: 'none',
-                            color: 'white',
-                            fontsize: '20px',
-                            alignItems: 'center',
-                            gap: '10px',
-                            borderRadius: '6px',
-                            padding: '8px 12px'
+                            alignItems: "center",
+                            gap: "7px"
                         }}
-                        onClick={() => logout()}
+                    >
+                        <FiYoutube size={25} color='red' />
+                        <h2 style={{
+                            fontSize: '20px',
+                            fontWeight: 'bold',
+                            margin: "0px",
+                        }}>YouTube</h2>
+                    </div>
+                    <FiX size={20} color='white'
+                        onClick={() => setIsOpen(false)}
+                        style={{
+                            color: 'white',
+                            backgroundColor: "transparent",
+                            border: 'none',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            padding: "7px",
+                            borderRadius: '50%'
+                        }}
                         onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                    >{<FiLogOut size={22} />}<span>Logout</span></Link></li>}
+                    />
+                </div>
+                <div className="sep" style={{ height: "2px", background: "gray", width: "100%" }}></div>
+                <ul style={{ listStyle: 'none', padding: 0, marginTop: "10px" }}>
+                    {categories.map((item) => (
+                        <li key={item.name} className='navig' style={{ marginBottom: '15px' }}>
 
+                            <NavLink
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    isActive ? "nav-item active" : "nav-item"
+                                }
+                            >
+                                {item.icon}
+                                <span>{item.name}</span>
+                            </NavLink>
+
+                        </li>
+                    ))}
+
+                    {user && (
+                        <li>
+                            <NavLink
+                                to="/login"
+                                className="nav-item"
+                                onClick={() => logout()}
+                            >
+                                <FiLogOut size={22} />
+                                <span>Logout</span>
+                            </NavLink>
+                        </li>
+                    )}
                 </ul>
+
                 <h2 style={{
                     borderTop: '1px solid #333',
                     fontSize: '20px',
@@ -145,7 +150,7 @@ const sidebar = ({ isOpen, setIsOpen }) => {
                     borderBottom: '1px solid #333',
                 }}>Subscription</h2>
                 {subscriptions.length > 0 && (
-                    <ul className='contsub' style={{ listStyle: 'none', padding: "10px", border: "1px solid #333", height: "150px", overflowY: "auto", borderRadius: "6px" }}>
+                    <ul className='contsub' style={{ listStyle: 'none', padding: "10px", border: "1px solid #333", height: "120px", overflowY: "auto", borderRadius: "6px" }}>
 
                         {subscriptions.map((item) => (
                             item.channel ? (
@@ -168,7 +173,39 @@ const sidebar = ({ isOpen, setIsOpen }) => {
                         ))}
                     </ul>
                 )}
-
+                {user && (
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            height: "45px",
+                            background: "#000000ff",
+                            width: "220px",
+                            position: "absolute",
+                            bottom: "40px",
+                            left: 0,
+                            padding: "2px 30px",
+                            cursor: "pointer"
+                        }}
+                        onClick={() => {
+                            setTimeout(() => {
+                                navigate(`/channel/${user.username}`)
+                            }, 1000);
+                        }}
+                    >
+                        <img src={user.avatar} about={"user"}
+                            style={{
+                                height: "35px",
+                                width: "35px",
+                                border: "none",
+                                objectFit: "cover",
+                                borderRadius: "50%"
+                            }}
+                        />
+                        <h3 style={{ margin: "0", color: "white" }}>{user.fullname}</h3>
+                    </div>
+                )}
 
             </motion.div >
         </>

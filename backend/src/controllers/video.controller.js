@@ -123,7 +123,7 @@ const getVidoeById = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
   if (!videoId) {
-    throw new ApiError(400, "Video ID not found");
+    throw new ApiError(404, "Video ID not found");
   }
 
   // 🔹 Step 1: Find the video and populate owner info
@@ -192,26 +192,32 @@ const updateVideo = asyncHandler(async (req, res) => {
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
-  const { videoId } = req.params
-  const userId = req.user?._id
-  const video = await Video.findById(videoId)
+  const { videoId } = req.params;
+  const userId = req.user?._id;
+
+  const video = await Video.findById(videoId);
+
   if (!video) {
-    throw new ApiError(400, "video not found")
+    throw new ApiError(400, "Video not found");
   }
-  if (video.owner.toString() !== userId.toString()) {
-    throw new ApiError(403, "Unauthorized to delete this video")
-  }
-  const videoPublicId = await video.VideoUrl.split("/").pop().split(".")[0]
-  const publicId = await video?.thumbnail.split('/').pop().split('.')[0];
-  await deleteOnCloudinary(videoPublicId)
-  await deleteOnCloudinary(publicId)
-  await Video.findByIdAndDelete(videoId)
+
+  const videoPublicId = video.videoUrl.split("/").slice(-1)[0].split(".")[0];
+  const thumbnailPublicId = video.thumbnail.split("/").slice(-1)[0].split(".")[0];
+
+  await deleteOnCloudinary(videoPublicId);        
+  await deleteOnCloudinary(thumbnailPublicId);   
+
+  await Video.findByIdAndDelete(videoId);
+
   return res.status(200).json(
-    200,
-    {},
-    "Video successfully deleted"
-  )
-})
+    new ApiResponse(
+      200,
+      {},
+      "Video successfully deleted!"
+    )
+  );
+});
+
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params
@@ -236,7 +242,6 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
 const downloadVideos = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
-  // ✅ Validate ObjectId
   if (!mongoose.Types.ObjectId.isValid(videoId)) {
     throw new ApiError(400, "Invalid video ID");
   }
@@ -250,10 +255,8 @@ const downloadVideos = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Video file URL is missing");
   }
 
-  // ✅ Always use HTTPS
   let secureUrl = video.videoUrl.replace("http://", "https://");
 
-  // ✅ Cloudinary download link (forces download)
   const downloadUrl = secureUrl.replace("/upload/", "/upload/fl_attachment/");
 
   return res

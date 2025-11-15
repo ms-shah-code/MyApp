@@ -28,7 +28,6 @@ const VideoSkeleton = () => {
             position: "relative",
           }}
         >
-          {/* Thumbnail Skeleton */}
           <div
             style={{
               height: "220px",
@@ -38,9 +37,7 @@ const VideoSkeleton = () => {
             }}
           ></div>
 
-          {/* Info Section */}
           <div style={{ padding: "10px", display: "flex", gap: "10px" }}>
-            {/* Avatar Skeleton */}
             <div
               style={{
                 height: "45px",
@@ -52,7 +49,6 @@ const VideoSkeleton = () => {
             ></div>
 
             <div style={{ flex: 1 }}>
-              {/* Title Skeleton */}
               <div
                 style={{
                   height: "16px",
@@ -72,7 +68,6 @@ const VideoSkeleton = () => {
                 }}
               ></div>
 
-              {/* Meta (channel + views) skeleton */}
               <div
                 style={{
                   height: "12px",
@@ -86,7 +81,6 @@ const VideoSkeleton = () => {
         </div>
       ))}
 
-      {/* shimmer keyframes */}
       <style>
         {`
           @keyframes shimmer {

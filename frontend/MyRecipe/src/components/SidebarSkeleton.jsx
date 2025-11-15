@@ -4,7 +4,6 @@ import '../styles/watch.css'
 const SidebarSkeleton = () => {
     return (
         <div>
-            {/* <aside className="sidebar-section"> */}
             <h3 className="next-videos-title">Next Videos</h3>
             <div className="recommended-videos">
                 <div className="video-card-skeleton"></div>
@@ -40,7 +39,6 @@ const SidebarSkeleton = () => {
                     </div>
                 </div>
             </div>
-            {/* </aside> */}
         </div>
     )
 }

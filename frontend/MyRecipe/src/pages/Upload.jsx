@@ -1,69 +1,76 @@
 import React, { useState, useRef } from "react";
-import { FaPlus } from "react-icons/fa";
-import { MdUpload } from "react-icons/md";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
-import { handleSuccess, handleError } from "../utility";
-import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft } from "react-icons/fa";
+import { handleError, handleSuccess } from "../utility";
+import { useNavigate } from "react-router-dom";
+import UploadPopup from "../components/UploadPopup";
+import { FaPlus, FaArrowLeft } from "react-icons/fa";
+import { MdUpload } from "react-icons/md";
 
 const Upload = () => {
   const navigate = useNavigate();
+
   const [uploadVideo, setUploadVideo] = useState({
     title: "",
     description: "",
   });
+
   const [videoFile, setVideoFile] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
+
   const [progress, setProgress] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const progressInterval = useRef(null);
   const fileInputRef = useRef(null);
 
-  // 📦 Handle text fields
+  const startFakeProgress = () => {
+    let p = 0;
+    setShowPopup(true);
+
+    progressInterval.current = setInterval(() => {
+      p += Math.random() * 2;
+      if (p < 90) setProgress(p);
+      else clearInterval(progressInterval.current);
+    }, 200);
+  };
+
+  const finishProgress = () => {
+    clearInterval(progressInterval.current);
+    setProgress(100);
+
+    setTimeout(() => {
+      setShowPopup(false);
+      setProgress(0);
+    }, 700);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUploadVideo((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🎥 Handle video file selection
   const handleVideo = (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith("video/")) {
-      setVideoFile(file);
-      console.log("🎬 Video selected:", file.name);
-    } else {
-      handleError("Please select a valid video file!");
-    }
+    if (!file || !file.type.startsWith("video/"))
+      return handleError("Invalid video");
+
+    setVideoFile(file);
   };
 
-  // 🖼️ Handle thumbnail file selection
   const handleThumbnail = (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      setThumbnail(file);
-      console.log("🖼️ Thumbnail selected:", file.name);
-    } else {
-      handleError("Please select a valid image!");
-    }
+    if (!file || !file.type.startsWith("image/"))
+      return handleError("Invalid thumbnail");
+
+    setThumbnail(file);
   };
 
-  // ♻️ Reset file
-  const resetFile = () => {
-    setVideoFile(null);
-  };
-
-  // 📁 Open file input on div click
-  const handleClick = () => {
-    fileInputRef.current.click();
-  };
-
-  // 🚀 Handle Upload Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!videoFile) return handleError("Select a video first!");
 
-    if (!videoFile) {
-      handleError("Please select a video first!");
-      return;
-    }
+    startFakeProgress();
 
     const formData = new FormData();
     formData.append("videoUrl", videoFile);
@@ -72,57 +79,40 @@ const Upload = () => {
     formData.append("description", uploadVideo.description);
 
     try {
-      const res = await axios.post(
-        "http://localhost:8000/api/v1/videos/up",
-        formData,
-        {
-          withCredentials: true,
-          onUploadProgress: (event) => {
-            const percent = Math.round((event.loaded * 100) / event.total)
-            setProgress(percent);
-          },
-        }
-      );
+      await axios.post("http://localhost:8000/api/v1/videos/up", formData, {
+        withCredentials: true,
+      });
 
-      handleSuccess("Upload successful!");
-      console.log("Response:", res.data);
-      setProgress(0);
+      handleSuccess("Upload Completed");
+      finishProgress();
+
       setUploadVideo({ title: "", description: "" });
       setVideoFile(null);
       setThumbnail(null);
-    } catch (error) {
-      console.error("❌ Upload failed:", error);
-      handleError("Upload failed!");
+    } catch (err) {
+      finishProgress();
+      handleError("Failed to upload");
     }
   };
 
   return (
     <div style={styles.page}>
-      <button onClick={() => navigate(-1)}
-        style={{
-          position: 'absolute',
-          top: "10px",
-          left: '10px',
-          color: 'gray',
-          borderRadius: '5px',
-          padding: '5px',
-          border: 'none',
-          background:"transparent"
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "#333")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+      <button
+        onClick={() => navigate(-1)}
+        style={styles.backBtn}
+      >
+        <FaArrowLeft size={26} />
+      </button>
 
-
-      ><FaArrowLeft size={28} /></button>
-      <div style={styles.container} onClick={!videoFile ? handleClick : null}>
+      <div style={styles.container} onClick={!videoFile ? () => fileInputRef.current.click() : null}>
         <input
           type="file"
-          name="videoUrl"
           accept="video/*"
           ref={fileInputRef}
           style={{ display: "none" }}
           onChange={handleVideo}
         />
+
         {!videoFile ? (
           <div style={styles.center}>
             <FaPlus size={50} color="#777" />
@@ -134,17 +124,16 @@ const Upload = () => {
               controls
               style={{ width: "100%", height: "100%", borderRadius: "10px" }}
             >
-              <source src={URL.createObjectURL(videoFile)} type="video/mp4" />
-              Your browser does not support the video tag
+              <source src={URL.createObjectURL(videoFile)} />
             </video>
-            <button style={styles.removeBtn} onClick={resetFile}>
+
+            <button style={styles.removeBtn} onClick={() => setVideoFile(null)}>
               Remove
             </button>
           </div>
         )}
       </div>
 
-      {/* Upload Form */}
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
           type="text"
@@ -164,16 +153,15 @@ const Upload = () => {
           style={styles.input}
         />
 
-        <label htmlFor="thumbnailFile" style={styles.thumbnailLabel}>
+        <label htmlFor="thumb" style={styles.thumbnailLabel}>
           Choose Thumbnail
         </label>
         <input
+          id="thumb"
           type="file"
-          id="thumbnailFile"
-          name="thumbnail"
           accept="image/*"
-          onChange={handleThumbnail}
           style={{ display: "none" }}
+          onChange={handleThumbnail}
         />
 
         <button type="submit" style={styles.uploadBtn}>
@@ -181,12 +169,7 @@ const Upload = () => {
         </button>
       </form>
 
-      {/* Upload Progress */}
-      {progress > 0 && (
-        <div style={{ marginTop: "10px", color: "white" }}>
-          Uploading: {progress}% <progress value={progress} max={100}></progress>
-        </div>
-      )}
+      {showPopup && <UploadPopup progress={progress} />}
 
       <ToastContainer />
     </div>
@@ -195,35 +178,46 @@ const Upload = () => {
 
 const styles = {
   page: {
+    height: "100vh",
+    background: "#000",
+    color: "white",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-    height: "100vh",
-    background: "#181818",
-    color: "white",
+    position: "relative",
+  },
+  backBtn: {
+    position: "absolute",
+    top: "10px",
+    left: "10px",
+    border: "none",
+    padding: "5px",
+    background: "transparent",
+    color: "gray",
+    cursor: "pointer",
   },
   container: {
     width: "400px",
-    height: "225px",
-    background: "#2d2d2dc9",
-    border: "2px dashed #aaa",
+    height: "230px",
+    background: "#202020",
+    border: "2px dashed #555",
     borderRadius: "12px",
+    marginTop: "70px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     cursor: "pointer",
     overflow: "hidden",
-    position: "relative",
   },
-  center: {
-    textAlign: "center",
-  },
+
+  center: { textAlign: "center" },
+
   previewBox: {
     width: "100%",
     height: "100%",
     position: "relative",
   },
+
   removeBtn: {
     position: "absolute",
     top: "10px",
@@ -231,50 +225,45 @@ const styles = {
     background: "red",
     color: "white",
     border: "none",
-    padding: "5px 10px",
+    padding: "6px 10px",
     borderRadius: "6px",
     cursor: "pointer",
   },
-  form: {
-    marginTop: "20px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
+
+  form: { marginTop: "20px", display: "flex", flexDirection: "column" },
+
   input: {
-    height: "30px",
-    fontSize: "16px",
-    border: "2px solid #474242c9",
-    borderRadius: "4px",
     width: "390px",
-    color: "white",
     background: "transparent",
-    margin: "10px 0px",
-    padding: "5px",
+    border: "2px solid #444",
+    borderRadius: "5px",
+    padding: "7px",
+    color: "white",
+    margin: "8px 0",
   },
+
   thumbnailLabel: {
-    margin: "10px 0px",
-    display: "block",
-    width: "374px",
-    border: "2px solid #474242c9",
+    width: "380px",
     padding: "10px",
-    textAlign: "center",
+    border: "2px solid #444",
     color: "gray",
+    textAlign: "center",
     cursor: "pointer",
   },
+
   uploadBtn: {
     background: "green",
-    color: "white",
-    border: "none",
     padding: "10px",
-    width: "400px",
-    borderRadius: "6px",
+    width: "405px",
+    borderRadius: "8px",
+    marginTop: "12px",
+    border: "none",
+    color: "white",
     fontWeight: "bold",
-    cursor: "pointer",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    gap: "7px",
+    gap: "8px",
   },
 };
 

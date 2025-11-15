@@ -8,9 +8,13 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import { FiEdit2 } from "react-icons/fi";
+import { FiDownload, FiTrash2, FiSave, FiBookmark, FiEdit2 } from "react-icons/fi";
 import { handleSuccess, handleError } from "../utility";
 import { ToastContainer } from "react-toastify";
+import About from "./About";
+import Playlist from "./Playlist";
+import MenuItem from "./MenuItem";
+import DeletePopUp from "./DeletePopUp";
 
 const ChannelProfile = () => {
   const { user } = useAuth();
@@ -28,6 +32,7 @@ const ChannelProfile = () => {
   const [activeTab, setActiveTab] = useState("videos");
   const [showControls, setShowControls] = useState(false);
   const [showCoverControls, setShowCoverControls] = useState(false)
+  const [deleting, setDeleting] = useState(false);
   const [signupInfo, setSignupInfo] = useState({
     avatar: ''
   })
@@ -60,11 +65,65 @@ const ChannelProfile = () => {
     coverRef.current.click()
   }
 
+  const handleEdit = (videoId) => navigate(`/edit/${videoId}`);
+  const handleDelete = async (videoId) => {
+    setDeleting(true);
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/videos/${videoId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log(data.message);
+        setDeleting(false);
+        return;
+      }
+
+      setVideos(prev => prev.filter(v => v._id !== videoId));
+
+      setMenuOpenId(null);
+
+    } catch (error) {
+      console.error("Delete error:", error);
+    } finally {
+      setTimeout(() => setDeleting(false), 800);
+    }
+  };
+  const handleSave = (videoId) => console.log("Saved video", videoId);
+
+  const handleDownload = async (videoId) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/videos/download/${videoId}`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to get download link");
+
+      const downloadUrl = data.data.downloadUrl;
+
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
   const handleChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Preview ke liye optional
     setSignupInfo({ avatar: file });
 
     const formData = new FormData();
@@ -72,7 +131,7 @@ const ChannelProfile = () => {
 
     try {
       const res = await fetch("http://localhost:8000/api/v1/users/update-avatar", {
-        method: "PATCH", // ya "POST" agar backend allow kare
+        method: "PATCH",
         body: formData,
         credentials: "include",
       });
@@ -83,7 +142,6 @@ const ChannelProfile = () => {
       if (success) {
         handleSuccess(message);
 
-        // ✅ instantly UI update ke liye:
         setUserProfile((prev) => ({
           ...prev,
           avatar: URL.createObjectURL(file),
@@ -116,7 +174,6 @@ const ChannelProfile = () => {
       if (success) {
         handleSuccess(message);
 
-        // ✅ instantly UI update ke liye:
         setUserProfile((prev) => ({
           ...prev,
           coverImage: URL.createObjectURL(file),
@@ -153,7 +210,6 @@ const ChannelProfile = () => {
       try {
         setLoading(true);
 
-        // ✅ Fetch user channel info
         const res = await fetch(`http://localhost:8000/api/v1/users/c/${uname}`, {
           method: "GET",
           credentials: "include",
@@ -163,7 +219,6 @@ const ChannelProfile = () => {
         const data = await res.json();
         setUserProfile(data.data);
         console.log("userProfile::", data.data)
-        // ✅ Fetch channel videos (based on user id)
         const videoRes = await fetch(
           `http://localhost:8000/api/v1/videos/user/${data.data._id}`,
           {
@@ -187,7 +242,6 @@ const ChannelProfile = () => {
     getProfile();
   }, [uname]);
 
-  //isSubscribed
   useEffect(() => {
     const checkSubscription = async () => {
       if (!userProfile?._id) return;
@@ -197,16 +251,15 @@ const ChannelProfile = () => {
           { method: "GET", credentials: "include" }
         );
         const data = await res.json();
-        setSubscribed(data.subscribed);
+        setSubscribed(data.data.subscribed);
       } catch (error) {
         console.error("Error checking subscription:", error);
       }
     };
+
     checkSubscription();
   }, [userProfile?._id]);
 
-
-  // ✅ Toggle Subscribe/Unsubscribe
   const handleSubscribe = async () => {
     if (!userProfile?._id) return;
 
@@ -217,12 +270,13 @@ const ChannelProfile = () => {
       );
       const data = await res.json();
 
-      if (data.success) setSubscribed(data.subscribed);
+      if (data.success) {
+        setSubscribed(data.data.subscribed);
+      }
     } catch (error) {
       console.error("Error toggling subscription:", error);
     }
   };
-
 
   if (loading || !userProfile) return <Loading />;
 
@@ -230,7 +284,6 @@ const ChannelProfile = () => {
     <div className="channel-page">
       <Navbar />
 
-      {/* ✅ Cover Image */}
       <div className="channel-cover"
         onMouseEnter={() => setShowCoverControls(true)}
         onMouseLeave={() => setShowCoverControls(false)}
@@ -264,19 +317,17 @@ const ChannelProfile = () => {
         )}
       </div>
 
-      {/* ✅ Channel Info Section */}
       <div className="channel-info">
         <div className="channel-avatar"
           onMouseEnter={() => setShowControls(true)}
           onMouseLeave={() => setShowControls(false)}
-          style={{ position: "relative" ,height:'100px',width:'100px'}}
+          style={{ position: "relative", height: '100px', width: '100px' }}
         >
           {userProfile.avatar ? (
             <img src={userProfile.avatar} alt="Channel Avatar" />
           ) : (
             <FaUserCircle size={100} color="#ccc" />
           )}
-          {/* Animate Edit icon */}
           {user && user._id === userProfile._id && (
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
@@ -349,108 +400,117 @@ const ChannelProfile = () => {
           About
         </button>
       </div>
-
-      {/* Tab Content */}
-      {/* <div className="tab-content">
-        {activeTab === "videos" && <VideosGrid videos={videos} />}
-        {activeTab === "playlists" && <PlaylistsGrid playlists={playlists} />}
-        {activeTab === "about" && <AboutSection userProfile={userProfile} />}
-      </div> */}
-
-      {/* ✅ Videos Grid */}
-      <div className="video-grid">
-        {videos && videos.length > 0 ? (
-          videos.map(item => (
-            <div key={item._id} style={{ background: "#0f0f0f", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
-              <div style={{ position: "relative", cursor: 'pointer' }}>
-                <img
-                  src={item.thumbnail}
-                  alt={item.title}
-                  style={{ height: "180px", width: "100%", objectFit: "cover", borderRadius: "10px" }}
-                  onClick={() => navigate(`/watch/${item._id}`)}
-                />
-                <div style={{ position: "absolute", bottom: "9px", right: "4px", padding: "2px 6px", borderRadius: "4px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: "12px" }}>
-                  {formatDuration(item.duration)}
+      <div className="tab-content">
+        {activeTab === "videos" && <div className="video-grid">
+          {videos && videos.length > 0 ? (
+            videos.map(item => (
+              <div key={item._id} style={{ background: "#0f0f0f", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
+                <div style={{ position: "relative", cursor: 'pointer' }}>
+                  <img
+                    src={item.thumbnail}
+                    alt={item.title}
+                    style={{ height: "180px", width: "100%", objectFit: "cover", borderRadius: "10px" }}
+                    onClick={() => navigate(`/watch/${item._id}`)}
+                  />
+                  <div style={{ position: "absolute", bottom: "9px", right: "4px", padding: "2px 6px", borderRadius: "4px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: "12px" }}>
+                    {formatDuration(item.duration)}
+                  </div>
                 </div>
-              </div>
 
-              <div style={{ padding: "10px" }}>
-                <div style={{ display: "flex", gap: "10px" }}>
-                  {/* <img src={userProfile.avatar} onClick={() => navigate(`/channel/${userProfile.username}`)} style={{ height: "45px", width: "45px", borderRadius: "50%", objectFit: "cover", cursor: 'pointer' }} /> */}
-                  <div style={{ flex: 1 }}>
-                    <p style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: "20px", fontWeight: "500" }}>{item.title}</p>
+                <div style={{ padding: "10px" }}>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: "20px", fontWeight: "500" }}>{item.title}</p>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ display: "flex", gap: "6px", fontSize: "13px", color: "#aaa", flexWrap: "wrap" }}>
-                        {/* <span>{userProfile.username}</span>
-                        <span>•</span> */}
-                        <span>{item.view} views</span>
-                        <span>•</span>
-                        <span>{item.createdAt ? timeAgo(item.createdAt) : ""}</span>
-                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", gap: "6px", fontSize: "13px", color: "#aaa", flexWrap: "wrap" }}>
 
-                      <div>
-                        <button
-                          ref={buttonRef}
-                          onClick={(e) => handleMenuClick(item._id, e)}
-                          onMouseEnter={(e) => e.currentTarget.style.background = "#3f3d3dff"}
-                          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                          style={{ background: "transparent", border: "none", cursor: "pointer", height: "30px", borderRadius: "50%", }}
-                        >
-                          <BsThreeDotsVertical size={20} color="white" />
-                        </button>
+                          <span>{item.view} views</span>
+                          <span>•</span>
+                          <span>{item.createdAt ? timeAgo(item.createdAt) : ""}</span>
+                        </div>
+
+                        <div>
+                          <BsThreeDotsVertical size={20} color="white" ref={buttonRef}
+                            onClick={(e) => handleMenuClick(item._id, e)}
+                            onMouseEnter={(e) => e.currentTarget.style.background = "#333"}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                            style={{ background: "transparent", border: "none", cursor: "pointer", borderRadius: "50%", padding: '7px' }} />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p className="no-videos">No videos uploaded yet</p>
-        )}
+            ))
+          ) : (
+            <p className="no-videos">No videos uploaded yet</p>
+          )}
+        </div>}
+        {
+          activeTab === "playlists" && <Playlist />
+        }
+        {
+          activeTab === "about" && <About />
+        }
       </div>
+      <DeletePopUp show={deleting} />
       {menuOpenId && (() => {
-
         const item = videos.find(v => v._id === menuOpenId);
-        return (<>
-          <div
-            onClick={(e) => handleMenuClick(item._id, e)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              backgroundColor: 'rgba(0,0,0,0.5)'
-            }}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            style={{
-              background: "#000000c7",
-              position: "absolute",
-              top: menuPosition.top,
-              left: menuPosition.left,
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.44)",
-              borderRadius: "8px",
-              zIndex: 1000,
-              overflow: "hidden",
-              padding: "0px 0px",
-            }}
-          >
-            <p onClick={() => handleSave()} style={{ cursor: "pointer", textAlign: "center", padding: "4px 18px", borderRadius: '6px', margin: '5px' }} onMouseEnter={(e) => e.currentTarget.style.background = "gray"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>save</p>
-            {item._id === user._id && (<>
-              <p onClick={() => handleEdit(item._id)} style={{ cursor: "pointer", textAlign: "center", padding: "4px 18px", borderRadius: '6px', margin: '5px' }} onMouseEnter={(e) => e.currentTarget.style.background = "gray"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>edit</p>
-              <p onClick={() => handleDelete(item._id)} style={{ cursor: "pointer", textAlign: "center", padding: "4px 18px", borderRadius: '6px', color: 'red', margin: '5px' }} onMouseEnter={(e) => e.currentTarget.style.background = "gray"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>delete</p>
-            </>)}
-          </motion.div>
-        </>
-        )
+
+        return (
+          <>
+            <div
+              onClick={(e) => handleMenuClick(item._id, e)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                backgroundColor: 'transparent',
+                zIndex: 900
+              }}
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.15 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              style={{
+                position: "absolute",
+                top: menuPosition.top,
+                left: menuPosition.left - 160,
+                background: "#282828",
+                borderRadius: "10px",
+                width: "200px",
+                padding: "6px 0",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+                zIndex: 1000,
+                overflow: "hidden",
+              }}
+            >
+
+              <MenuItem text="Save" icon={<FiBookmark size={18} color="#fff" />} onClick={handleSave} />
+
+              <MenuItem
+                text="Download"
+                icon={<FiDownload size={18} color="#fff" />}
+                onClick={() => handleDownload(item._id)}
+              />
+              {item.owner === user?._id && (
+                <>
+                  <MenuItem text="Edit" icon={<FiEdit2 size={18} color="#fff" />} onClick={() => handleEdit(item._id)} />
+                  <MenuItem text="Delete" icon={<FiTrash2 size={18} color="red" />} textColor="red" onClick={() => handleDelete(item._id)} />
+                </>
+              )}
+
+            </motion.div>
+          </>
+        );
       })()}
+
       <ToastContainer />
     </div>
   );

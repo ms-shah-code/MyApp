@@ -38,13 +38,11 @@
   }
 }
 
-/* Thumbnail Placeholder */
 .thumbnail {
   height: 200px;
   width: 100%;
 }
 
-/* Avatar + text row */
 .skeleton-row {
   display: flex;
   align-items: flex-start;
@@ -59,7 +57,6 @@
   flex-shrink: 0;
 }
 
-/* Text lines */
 .skeleton-text {
   flex: 1;
 }

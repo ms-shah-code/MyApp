@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { motion } from "framer-motion";
 import VideoSkeleton from "./VideoSkeleton";
+import { FiDownload, FiTrash2, FiSave, FiBookmark, FiEdit2 } from "react-icons/fi"
+import MenuItem from "./MenuItem"
+import { AiFillHome } from 'react-icons/ai'
+import { MdOutlineSubscriptions, MdVideoLibrary, MdHistory, MdUpload } from 'react-icons/md'
+import DeletePopUp from "./DeletePopUp";
 
 const Home = () => {
   const { user } = useAuth();
@@ -16,6 +21,16 @@ const Home = () => {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef(null);
+  const [popupMsg, setPopupMsg] = useState("");
+  const [showMsg, setShowMsg] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const showPopup = (msg) => {
+    setPopupMsg(msg);
+    setShowMsg(true);
+    setTimeout(() => setShowMsg(false), 2000);
+  };
+
 
   useEffect(() => {
     fetchVideos();
@@ -36,7 +51,7 @@ const Home = () => {
 
       const a = document.createElement("a");
       a.href = downloadUrl;
-      a.download = ""; // auto-download
+      a.download = "";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -49,7 +64,7 @@ const Home = () => {
 
   const fetchVideos = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/videos?page=${page}&limit=8`, {
+      const res = await fetch(`http://localhost:8000/api/v1/videos?page=${page}&limit=9`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -67,9 +82,35 @@ const Home = () => {
     }
   };
 
-  // Three-dot menu actions
   const handleEdit = (videoId) => navigate(`/edit/${videoId}`);
-  const handleDelete = (videoId) => setVideos(videos.filter(v => v._id !== videoId));
+  const handleDelete = async (videoId) => {
+    setDeleting(true);
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/videos/${videoId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log(data.message);
+        setDeleting(false);
+        return;
+      }
+
+      setVideos(prev => prev.filter(v => v._id !== videoId));
+
+      setMenuOpenId(null);
+
+    } catch (error) {
+      console.error("Delete error:", error);
+    } finally {
+      setTimeout(() => setDeleting(false), 800);
+    }
+  };
+
   const handleSave = (videoId) => console.log("Saved video", videoId);
 
   const timeAgo = (timestamp) => {
@@ -108,7 +149,7 @@ const Home = () => {
   };
 
   return (
-    <div style={{ padding: "1rem", background: "#0f0f0f", minHeight: "100vh", color: "#fff" }}>
+    <div style={{ padding: "1rem", background: "#000000ff", minHeight: "100vh", color: "#fff" }}>
       <InfiniteScroll
         dataLength={videos.length}
         next={fetchVideos}
@@ -118,7 +159,7 @@ const Home = () => {
       >
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: "1rem", marginTop: "1rem" }}>
           {videos.map(item => (
-            <div key={item._id} style={{ background: "#0f0f0f", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
+            <div key={item._id} style={{ background: "#000000ff", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
               <div style={{ position: "relative", cursor: 'pointer' }}>
                 <img
                   src={item.thumbnail}
@@ -147,15 +188,11 @@ const Home = () => {
                       </div>
 
                       <div>
-                        <button
-                          ref={buttonRef}
+                        <BsThreeDotsVertical size={20} color="white" ref={buttonRef}
                           onClick={(e) => handleMenuClick(item._id, e)}
-                          onMouseEnter={(e) => e.currentTarget.style.background = "#0c0c0c"}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "#2a2929ff"}
                           onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                          style={{ background: "transparent", border: "none", cursor: "pointer", height: "30px", borderRadius: "50%", }}
-                        >
-                          <BsThreeDotsVertical size={20} color="white" />
-                        </button>
+                          style={{ background: "transparent", border: "none", cursor: "pointer", borderRadius: "50%", padding: "10px" }} />
                       </div>
                     </div>
                   </div>
@@ -165,50 +202,61 @@ const Home = () => {
           ))}
         </div>
       </InfiniteScroll>
+      <DeletePopUp show={deleting} />
 
-      {/* Dropdown Menu */}
       {menuOpenId && (() => {
-
         const item = videos.find(v => v._id === menuOpenId);
-        return (<>
-          <div
-            onClick={(e) => handleMenuClick(item._id, e)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              backgroundColor: 'rgba(0,0,0,0.5)'
-            }}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            style={{
-              background: "#000000c7",
-              position: "absolute",
-              top: menuPosition.top,
-              left: menuPosition.left,
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.44)",
-              borderRadius: "8px",
-              zIndex: 1000,
-              overflow: "hidden",
-              padding: "0px 0px",
-            }}
-          >
-            <p onClick={() => handleSave()} style={{ cursor: "pointer", textAlign: "center", padding: "4px 18px", borderRadius: '6px', margin: '5px' }} onMouseEnter={(e) => e.currentTarget.style.background = "gray"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>save</p>
-            <p onClick={() => handleDownload(item._id)} style={{ cursor: "pointer", textAlign: "center", padding: "4px 18px", borderRadius: '6px', margin: '5px' }} onMouseEnter={(e) => e.currentTarget.style.background = "gray"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>Download</p>
-            {item.ownerDetails._id === user._id && (<>
-              <p onClick={() => handleEdit(item._id)} style={{ cursor: "pointer", textAlign: "center", padding: "4px 18px", borderRadius: '6px', margin: '5px' }} onMouseEnter={(e) => e.currentTarget.style.background = "gray"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>edit</p>
-              <p onClick={() => handleDelete(item._id)} style={{ cursor: "pointer", textAlign: "center", padding: "4px 18px", borderRadius: '6px', color: 'red', margin: '5px' }} onMouseEnter={(e) => e.currentTarget.style.background = "gray"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>delete</p>
-            </>)}
-          </motion.div >
-        </>
-        )
+        if (!item) return null; 
+        return (
+          <>
+            <div
+              onClick={(e) => handleMenuClick(item._id, e)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                backgroundColor: 'transparent',
+                zIndex: 900
+              }}
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.15 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              style={{
+                position: "absolute",
+                top: menuPosition.top,
+                left: menuPosition.left - 160,
+                background: "#282828",
+                borderRadius: "10px",
+                width: "200px",
+                padding: "6px 0",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+                zIndex: 1000,
+                overflow: "hidden",
+              }}
+            >
+
+
+              <MenuItem text="Save" icon={<FiBookmark size={18} color="#fff" />} onClick={handleSave} />
+              <MenuItem text="Download" icon={<FiDownload size={18} color="#fff" />} onClick={() => handleDownload(item._id)} />
+
+              {item.ownerDetails?._id === user?._id && (
+                <>
+                  <MenuItem text="Edit" icon={<FiEdit2 size={18} color="#fff" />} onClick={() => handleEdit(item._id)} />
+                  <MenuItem text="Delete" icon={<FiTrash2 size={18} color="red" />} textColor="red" onClick={() => handleDelete(item._id)} />
+                </>
+              )}
+
+            </motion.div>
+          </>
+        );
       })()}
+
     </div >
   );
 };

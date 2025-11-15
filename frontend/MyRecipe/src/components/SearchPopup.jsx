@@ -10,7 +10,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
   const [typingTimeout, setTypingTimeout] = useState(null);
   const navigate = useNavigate();
 
-  // 🕒 timeAgo function
   const timeAgo = (timestamp) => {
     if (!timestamp) return "";
     const now = new Date();
@@ -30,7 +29,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
     return `${years} year${years !== 1 ? "s" : ""} ago`;
   };
 
-  // 🔍 Fetch videos
   const fetchVideos = async (q) => {
     if (!q.trim()) {
       setResults([]);
@@ -49,7 +47,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
     }
   };
 
-  // 🎯 Debounce
   useEffect(() => {
     if (typingTimeout) clearTimeout(typingTimeout);
     if (query.trim()) {
@@ -62,7 +59,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
 
   return (
     <>
-      {/* Overlay */}
       {isOpenSe && (
         <div
           style={{
@@ -78,7 +74,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
         />
       )}
 
-      {/* Search Popup */}
       <motion.div
         initial={{ y: "-100%" }}
         animate={{ y: isOpenSe ? 0 : "-100%" }}
@@ -100,7 +95,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
           gap: "10px",
         }}
       >
-        {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
           <button
             onClick={() => setIsOpenSe(false)}
@@ -134,7 +128,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
           />
         </div>
 
-        {/* Live results */}
         {results.length > 0 && (
           <div
             className="scrollable-videos"
@@ -198,7 +191,6 @@ const SearchPopup = ({ isOpenSe, setIsOpenSe }) => {
           </div>
         )}
 
-        {/* No results */}
         {query.trim() && results.length === 0 && (
           <p style={{ color: "#aaa", marginTop: "10px" }}>No results found.</p>
         )}

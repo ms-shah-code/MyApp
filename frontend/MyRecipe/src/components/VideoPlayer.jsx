@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaPlay, FaPause, FaExpand, FaCompress, } from "react-icons/fa";
-import { FaCog } from "react-icons/fa"; // Font Awesome gear
+import { FaCog } from "react-icons/fa"; 
 import "../styles/youtubePlayer.css";
 
 const YouTubePlayer = ({ src }) => {
@@ -16,14 +16,13 @@ const YouTubePlayer = ({ src }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [speedMenu, setSpeedMenu] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [overlay, setOverlay] = useState(null); // {type: "forward/backward/play", text: "10s»/«10s/▶"}
+  const [overlay, setOverlay] = useState(null);
   const [tooltipTime, setTooltipTime] = useState(null);
   const [tooltipPos, setTooltipPos] = useState(0);
   const [bufferedWidth, setBufferedWidth] = useState(0);
-  const [playOverlay, setPlayOverlay] = useState(null); // play/pause overlay
+  const [playOverlay, setPlayOverlay] = useState(null); 
 
 
-  // Play / Pause
   const togglePlay = () => {
     const video = videoRef.current;
     if (isPlaying) {
@@ -39,13 +38,11 @@ const YouTubePlayer = ({ src }) => {
   };
 
 
-  // Fullscreen
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) containerRef.current.requestFullscreen();
     else document.exitFullscreen();
   };
 
-  // Format time
   const formatTime = (time) => {
     if (!time) return "00:00";
     const hrs = Math.floor(time / 3600);
@@ -56,7 +53,6 @@ const YouTubePlayer = ({ src }) => {
       : `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
-  // Update progress & buffered
   useEffect(() => {
     const video = videoRef.current;
 
@@ -79,7 +75,6 @@ const YouTubePlayer = ({ src }) => {
     };
   }, []);
 
-  // Controls auto-hide
   useEffect(() => {
     if (showControls) {
       const timer = setTimeout(() => setShowControls(false), 2000);
@@ -87,18 +82,15 @@ const YouTubePlayer = ({ src }) => {
     }
   }, [showControls]);
 
-  // Double-click 10s forward/backward
   const handleDoubleClick = (e) => {
     const video = videoRef.current;
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
 
     if (clickX < rect.width / 2) {
-      // backward
       video.currentTime = Math.max(video.currentTime - 10, 0);
       setOverlay({ type: "backward", text: "« 10s" });
     } else {
-      // forward
       video.currentTime = Math.min(video.currentTime + 10, video.duration);
       setOverlay({ type: "forward", text: "10s »" });
     }
@@ -107,7 +99,6 @@ const YouTubePlayer = ({ src }) => {
   };
 
 
-  // Seekbar
   const handleSeekbar = (e) => {
     const video = videoRef.current;
     const newTime = (e.target.value / 100) * video.duration;
@@ -115,7 +106,6 @@ const YouTubePlayer = ({ src }) => {
     setProgress(e.target.value);
   };
 
-  // Tooltip hover
   const handleSeekHover = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const percent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -138,7 +128,6 @@ const YouTubePlayer = ({ src }) => {
         onClick={togglePlay}
         onDoubleClick={handleDoubleClick}
       />
-      {/* Play/Pause overlay */}
       <AnimatePresence>
         {playOverlay && (
           <motion.div
@@ -162,7 +151,6 @@ const YouTubePlayer = ({ src }) => {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* 10s forward/backward overlay */}
       <AnimatePresence>
         {overlay && (
           <motion.div
@@ -198,7 +186,6 @@ const YouTubePlayer = ({ src }) => {
         )}
       </AnimatePresence>
 
-      {/* Controls */}
       <AnimatePresence>
         {showControls && (
           <motion.div
@@ -208,7 +195,6 @@ const YouTubePlayer = ({ src }) => {
             transition={{ duration: 0.3 }}
             style={{ position: "absolute", bottom: 0, width: "100%", background: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2))", padding: "10px", display: "flex", flexDirection: "column", gap: "5px" }}
           >
-            {/* Seekbar */}
             <div className="seekbar-container" onMouseMove={handleSeekHover}>
               <div className="buffered" style={{ width: `${bufferedWidth}%` }}></div>
               <div className="played" style={{ width: `${progress}%` }}></div>
@@ -216,7 +202,6 @@ const YouTubePlayer = ({ src }) => {
               {tooltipTime && <div className="seekbar-tooltip" style={{ left: `${tooltipPos}%` }}>{tooltipTime}</div>}
             </div>
 
-            {/* Bottom controls */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "#fff", width: "98%" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <button onClick={togglePlay} style={{ background: "transparent", border: "none", color: "#fff", cursor: "pointer" }}>

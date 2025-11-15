@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAuth } from '../context/authContext'
-import Navbar from '../components/Navbar'
+import Navbar from '../components/navbar'
 
 const Profile = () => {
   const { user } = useAuth()

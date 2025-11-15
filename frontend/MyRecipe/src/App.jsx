@@ -10,11 +10,11 @@ import Upload from './pages/Upload'
 import Loading from './components/Loading'
 import Watch from './pages/Watch'
 import ChannelProfile from './components/channelProfile'
-import SearchPage from './components/SearchPage'
 import './styles/All.css'
 import Navbar from './components/navbar'
 import SubscriptionPage from './components/SubscriptionPage'
 import History from './pages/History'
+import ChannelVideos from "./pages/ChannelVideos"
 
 function App() {
   const [count, setCount] = useState(0)
@@ -32,10 +32,10 @@ function App() {
             <Route path='/loading' element={<Loading />} />
             <Route path='/upload' element={<ProtectedRoute><Upload /></ProtectedRoute>} />
             <Route path='/watch/:videoId' element={<Watch />} />
-            {/* <Route path='/search' element={<SearchPage/>} /> */}
             <Route path='/channel/:uname' element={<ChannelProfile />} />
             <Route path='/subscriptions' element={<SubscriptionPage />} />
             <Route path='/history' element={<History />} />
+            <Route path="/user/:userId" element={<ChannelVideos />} />
             <Route path='*' element={<h1>404 Not Found</h1>} />
           </Routes>
         </AuthProvider>

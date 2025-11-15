@@ -1,4 +1,3 @@
-// src/components/CommentBox.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { FaUserCircle, FaThumbsUp, FaRegThumbsUp } from "react-icons/fa";
@@ -16,14 +15,10 @@ const CommentBox = ({ videoId }) => {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
-  // replies: { commentId: [replyObj,...] }
   const [replies, setReplies] = useState({});
-  // openReplies: { commentId: boolean }
   const [openReplies, setOpenReplies] = useState({});
   const [replyBox, setReplyBox] = useState(null);
   const [replyTexts, setReplyTexts] = useState({});
-
-  // helper: time ago
   const timeAgo = (timestamp) => {
     if (!timestamp) return "";
     const now = new Date();
@@ -38,7 +33,6 @@ const CommentBox = ({ videoId }) => {
     return `${days}d ago`;
   };
 
-  // Fetch comments on mount / videoId change
   useEffect(() => {
     const fetchComments = async () => {
       setLoading(true);
@@ -51,11 +45,9 @@ const CommentBox = ({ videoId }) => {
         if (data.success) {
           const fetched = data.data || [];
 
-          // Build initial replies map from comment.replies if backend populated them
           const initialReplies = {};
           fetched.forEach((c) => {
             if (Array.isArray(c.replies) && c.replies.length > 0) {
-              // store replies array (already populated with owner)
               initialReplies[c._id] = c.replies;
             }
           });
@@ -76,7 +68,6 @@ const CommentBox = ({ videoId }) => {
     if (videoId) fetchComments();
   }, [videoId]);
 
-  // Add a new comment
   const handleAddComment = async () => {
     if (!text.trim()) return handleError("Comment field is empty");
     setLoading(true);
@@ -90,7 +81,6 @@ const CommentBox = ({ videoId }) => {
       const data = await res.json();
       if (data.success) {
         handleSuccess("Comment added");
-        // Prepend new comment to list
         setComments((prev) => [data.data, ...prev]);
         setText("");
       } else handleError(data.message || "Failed to add comment");
@@ -102,7 +92,6 @@ const CommentBox = ({ videoId }) => {
     }
   };
 
-  // Toggle like for comment or reply (same endpoint)
   const handleLike = async (id) => {
     try {
       const res = await fetch(`${API_BASE}/${id}`, {
@@ -113,7 +102,6 @@ const CommentBox = ({ videoId }) => {
       if (data.success) {
         const liked = data.data.liked;
 
-        // Update parent comments if id matches a comment
         setComments((prev) =>
           prev.map((c) =>
             c._id === id
@@ -125,7 +113,6 @@ const CommentBox = ({ videoId }) => {
           )
         );
 
-        // Update replies map (id might be a reply id)
         setReplies((prev) => {
           const updated = {};
           for (const key of Object.keys(prev)) {
@@ -147,7 +134,6 @@ const CommentBox = ({ videoId }) => {
     }
   };
 
-  // Add reply to a comment or to a reply (backend treats replies as Comment docs with parent pushed)
   const handleAddReply = async (parentId) => {
     const replyText = replyTexts[parentId]?.trim();
     if (!replyText) return handleError("Reply cannot be empty");
@@ -162,12 +148,10 @@ const CommentBox = ({ videoId }) => {
       const data = await res.json();
       if (data.success) {
         handleSuccess("Reply added");
-        // Ensure replies[parentId] exists and prepend
         setReplies((prev) => ({
           ...prev,
           [parentId]: [data.data, ...(prev[parentId] || [])],
         }));
-        // clear input & close box
         setReplyTexts((prev) => ({ ...prev, [parentId]: "" }));
         setReplyBox(null);
         setOpenReplies((prev) => ({ ...prev, [parentId]: true }));
@@ -180,21 +164,17 @@ const CommentBox = ({ videoId }) => {
     }
   };
 
-  // View / fetch replies for a comment
   const handleViewReplies = async (commentId) => {
-    // if visible -> hide
     if (openReplies[commentId]) {
       setOpenReplies((prev) => ({ ...prev, [commentId]: false }));
       return;
     }
 
-    // if already loaded -> show
     if (replies[commentId]) {
       setOpenReplies((prev) => ({ ...prev, [commentId]: true }));
       return;
     }
 
-    // otherwise fetch from backend
     try {
       const res = await fetch(`${API_BASE}/reply/${commentId}`, {
         method: "GET",
@@ -202,12 +182,10 @@ const CommentBox = ({ videoId }) => {
       });
       const data = await res.json();
       if (data.success) {
-        // filter duplicates if the comment already had replies in comments list
         const commentObj = comments.find((c) => c._id === commentId) || {};
         const existingIds = new Set((commentObj.replies || []).map((r) => r._id));
         const unique = (data.data || []).filter((r) => !existingIds.has(r._id));
 
-        // If commentObj.replies existed and had replies, prefer showing combined list:
         const combined = (commentObj.replies && commentObj.replies.length)
           ? [...commentObj.replies, ...unique]
           : [...(unique || [])];
@@ -227,7 +205,6 @@ const CommentBox = ({ videoId }) => {
         {comments.length} {comments.length === 1 ? "Comment" : "Comments"}
       </h3>
 
-      {/* Add Comment */}
       <div className="add-cont">
         {user?.avatar ? (
           <img src={user.avatar} alt="avatar" className="comment-avatar" />
@@ -254,7 +231,6 @@ const CommentBox = ({ videoId }) => {
         </div>
       </div>
 
-      {/* Comments list */}
       <div className="comment-list">
         {comments.length === 0 ? (
           <p className="no-comments">No comments yet</p>
@@ -325,14 +301,12 @@ const CommentBox = ({ videoId }) => {
                     </div>
                   )}
 
-                  {/* view replies button */}
                   {replyCount > 0 && (
                     <button className="view-replies-btn" onClick={() => handleViewReplies(comment._id)}>
                       {openReplies[comment._id] ? "Hide Replies" : `View ${replyCount} repl${replyCount > 1 ? "ies" : "y"}`}
                     </button>
                   )}
 
-                  {/* render replies (single source of truth: replies[commentId]) */}
                   {openReplies[comment._id] &&
                     (replies[comment._id] || []).map((reply) => (
                       <div key={reply._id} className="reply">
@@ -362,7 +336,6 @@ const CommentBox = ({ videoId }) => {
                             </button>
                           </div>
 
-                          {/* nested reply input for reply->reply */}
                           {replyBox === reply._id && (
                             <div className="reply-box">
                               <div className="reply-input-wrapper">

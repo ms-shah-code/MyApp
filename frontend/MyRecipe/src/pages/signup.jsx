@@ -82,11 +82,11 @@ const signup = () => {
         justifyContent: 'center',
         alignItems: 'center',
         height: "100vh",
-        background: "#202020",
+        background: "#1c1c1c",
         color:'white'
       }}>
-      <div className='container' style={{background:"#313131"}}>
-        <h1>Sign up</h1>
+      <div className='container'>
+        <h2 style={{margin:"5px"}}>Sign up</h2>
         <form onSubmit={handleSubmit}>
           <div className="main">
             <div className='avatar'>
@@ -98,46 +98,50 @@ const signup = () => {
               <label htmlFor='avatarFile' className='label' style={{color:'white',border:"2px solid white"}}>Avatar</label>
               <input type="file" name='avatar' accept='image/*' id='avatarFile' style={{ display: "none" }} onChange={handleChange} />
             </div>
-            <div className="">
+            <div className="cont">
+              <label htmlFor='email'>Email:</label>
               <input
                 type="email"
                 name="email"
                 value={signupInfo.email}
                 onChange={handleChange}
                 placeholder='Enter your email'
-                style={{background:"transparent",border:'1px solid gray',outline:'none',color:'white',width:"92%"}}
+                 style={{background:"transparent",border:'none',color:'white',width:"92%",borderRadius:"0px",borderBottom:"1px solid white",outline:"none"}}
               />
             </div>
-            <div className="">
+            <div className="cont">
+              <label htmlFor='fullname'>Fullname:</label>
               <input type="text"
                 name="fullname"
                 value={signupInfo.fullname}
                 onChange={handleChange}
                 placeholder='Fullname'
-                style={{background:"transparent",border:'1px solid gray',color:'white',width:"92%"}}
+                style={{background:"transparent",border:'none',color:'white',width:"92%",borderRadius:"0px",borderBottom:"1px solid white",outline:"none"}}
               />
             </div>
-            <div>
+            <div className='cont'>
+              <label htmlFor='username'>Username:</label>
               <input type="text"
                 name="username"
                 value={signupInfo.username}
                 placeholder='Username'
                 onChange={handleChange}
-                style={{background:"transparent",border:'1px solid gray',color:'white',width:"92%"}}
+               style={{background:"transparent",border:'none',color:'white',width:"92%",borderRadius:"0px",borderBottom:"1px solid white",outline:"none"}}
               />
             </div>
-            <div>
+            <div className='cont'>
+              <label htmlFor='password'>Password:</label>
               <input type="password"
                 name="password"
                 value={signupInfo.password}
                 placeholder='Password'
                 onChange={handleChange}
-                style={{background:"transparent",border:'1px solid gray',color:'white',width:"92%"}}
+                 style={{background:"transparent",border:'none',color:'white',width:"92%",borderRadius:"0px",borderBottom:"1px solid white",outline:"none"}}
               />
             </div>
-            <button type='submit' className='sbtn' style={{background:"#0277bd"}}>Signup</button>
-            <span>Already have an account ? 
-              <Link to='/login' style={{color:"blue"}}>Login</Link>
+            <button type='submit' className='sbtn' style={{background:"linear-gradient(90deg, #ff8a00, #e52e71"}}>Signup</button>
+            <span style={{margin:"auto",fontSize:"15px"}}>Already have an account ? &nbsp;
+               <Link to='/login' style={{color:"blue"}}>Login</Link>
             </span>
           </div>
         </form>

@@ -1,8 +1,0 @@
-.contsub::-webkit-scrollbar{
-    width: 0;
-    background: transparent;
-}
-.contsub::-webkit-scrollbar-thumb{
-    border-radius: 0;
-    background: transparent;
-}

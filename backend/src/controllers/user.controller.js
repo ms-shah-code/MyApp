@@ -6,10 +6,7 @@ import mongoose from "mongoose"
 import jwt from "jsonwebtoken"
 import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js"
 import { Subscription } from "../models/subscription.model.js"
-// import dotenv from "dotenv"
-// dotenv.config({
-//     path: './.env'
-// })
+
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -346,12 +343,12 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         )
 })
 const getWatchHistory = asyncHandler(async (req, res) => {
-  // 🔹 Step 1: Ensure user is logged in
+
   if (!req.user?._id) {
     throw new ApiError(401, "Unauthorized access - user not logged in");
   }
 
-  // 🔹 Step 2: Aggregate user with populated watch history
+  
   const user = await User.aggregate([
     {
       $match: {
@@ -388,21 +385,19 @@ const getWatchHistory = asyncHandler(async (req, res) => {
             },
           },
           {
-            $sort: { createdAt: -1 }, // 🕒 latest watched first
+            $sort: { createdAt: -1 },
           },
         ],
       },
     },
   ]);
 
-  //  Step 3: Handle case where user or history not found
   if (!user || user.length === 0) {
     throw new ApiError(404, "User not found or no watch history");
   }
 
   const history = user[0].watchHistory || [];
 
-  // 🔹 Step 4: Send response
   return res
     .status(200)
     .json(new ApiResponse(200, history, "Watch history fetched successfully"));

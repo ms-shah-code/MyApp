@@ -21,13 +21,13 @@
 
 .like-btn.active,
 .dislike-btn.active {
-  background: #d3e3fd; /* light blue for like */
-  color: #065fd4; /* blue icon/text */
+  background: #d3e3fd;
+  color: #065fd4; 
 }
 
 .dislike-btn.active {
-  background: #fdd3d3; /* light red for dislike */
-  color: #d32f2f; /* red icon/text */
+  background: #fdd3d3; 
+  color: #d32f2f;
 }
 
 .like-btn:hover,

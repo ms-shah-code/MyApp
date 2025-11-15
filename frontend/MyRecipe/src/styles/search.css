@@ -3,20 +3,18 @@
   max-height: 350px;
   overflow-y: auto;
 
-  /* For Firefox */
-  scrollbar-width: thin; /* ya 'none' for completely hidden */
+  scrollbar-width: thin; 
   scrollbar-color: transparent transparent;
 
-  /* For Chrome, Edge, Safari */
 }
 
 .scrollable-videos::-webkit-scrollbar {
-  width: 0px; /* completely hide */
-  background: transparent; /* make background transparent */
+  width: 0px; 
+  background: transparent; 
 }
 
 .scrollable-videos::-webkit-scrollbar-thumb {
-  background: transparent; /* make thumb transparent */
+  background: transparent;
   border-radius: 0px;
 }
 .scrollable-videos {
@@ -24,19 +22,19 @@
   max-height: 350px;
   overflow-y: auto;
 
-  /* For Firefox */
-  scrollbar-width: thin; /* ya 'none' for completely hidden */
+
+  scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 
-  /* For Chrome, Edge, Safari */
+
 }
 
 .scrollable-videos::-webkit-scrollbar {
-  width: 0px; /* completely hide */
-  background: transparent; /* make background transparent */
+  width: 0px; 
+  background: transparent; 
 }
 
 .scrollable-videos::-webkit-scrollbar-thumb {
-  background: transparent; /* make thumb transparent */
+  background: transparent; 
   border-radius: 0px;
 }
